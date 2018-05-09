@@ -294,5 +294,65 @@ namespace Agoda.LoadBalancing.Test
                     true),
                 Times.Never);
         }
+
+        [Test]
+        public void OnUpdateWeight_Success()
+        {
+            var newWeightItem = new WeightItem(100, 100);
+            _strats.Setup(x => x.UpdateWeight(
+                    It.IsAny<ImmutableDictionary<string, WeightItem>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<WeightItem>(),
+                    It.IsAny<bool>()))
+                .Returns(new Dictionary<string, WeightItem>()
+                {
+                    {"tgt", newWeightItem}
+                }.ToImmutableDictionary());
+
+            var mgr = new DynamicWeightRetryManager<string>(
+                _dict,
+                _strats.Object,
+                (_1, _2) => true);
+            var onUpdateWeightCount = 0;
+            mgr.OnUpdateWeight += (sender, args) =>
+            {
+                onUpdateWeightCount++;
+                Assert.AreEqual(newWeightItem, args.WeightItems.First());
+            };
+
+            mgr.ExecuteAction((str, _) => str);
+
+            Assert.AreEqual(1, onUpdateWeightCount);
+        }
+
+        [Test]
+        public void OnAllSourcesReachBottom_Failure()
+        {
+            var newWeightItem = new WeightItem(1, 100, 1);
+            _strats.Setup(x => x.UpdateWeight(
+                    It.IsAny<ImmutableDictionary<string, WeightItem>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<WeightItem>(),
+                    It.IsAny<bool>()))
+                .Returns(new Dictionary<string, WeightItem>()
+                {
+                    {"tgt", newWeightItem}
+                }.ToImmutableDictionary());
+
+            var mgr = new DynamicWeightRetryManager<string>(
+                _dict,
+                _strats.Object,
+                (_1, _2) => true);
+            var onEventRaised = 0;
+            mgr.OnAllSourcesReachBottom += (sender, args) =>
+            {
+                onEventRaised++;
+                Assert.AreEqual(newWeightItem, args.WeightItems.First());
+            };
+
+            mgr.ExecuteAction((str, _) => str);
+
+            Assert.AreEqual(1, onEventRaised);
+        }
     }
 }

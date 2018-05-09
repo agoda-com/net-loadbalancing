@@ -118,20 +118,33 @@ namespace Agoda.LoadBalancing
 
         private void UpdateWeight(KeyValuePair<TSource, WeightItem> item, bool isSuccess)
         {
+            ImmutableDictionary<TSource, WeightItem> oldCollection;
+            ImmutableDictionary<TSource, WeightItem> newCollection;
             lock (_collection)
             {
-                _collection = _weightManipulationStrategy.UpdateWeight(
-                    _collection,
+                oldCollection = _collection;
+                newCollection = _weightManipulationStrategy.UpdateWeight(
+                    oldCollection,
                     item.Key,
                     item.Value,
                     isSuccess);
+                _collection = newCollection;
+            }
+
+            if (oldCollection != newCollection)
+            {
+                OnOnUpdateWeight(newCollection.Values);
+                if (newCollection.Values.All(x => x.Weight == x.MinWeight))
+                {
+                    OnOnAllSourcesReachBottom(newCollection.Values);
+                }
             }
         }
 
-        protected virtual void OnOnUpdateWeight() =>
-            OnUpdateWeight?.Invoke(this, new UpdateWeightEventArgs(Collection));
+        protected virtual void OnOnUpdateWeight(IEnumerable<WeightItem> weights) =>
+            OnUpdateWeight?.Invoke(this, new UpdateWeightEventArgs(weights));
 
-        protected virtual void OnOnAllSourcesReachBottom() =>
-            OnAllSourcesReachBottom?.Invoke(this, new UpdateWeightEventArgs(Collection));
+        protected virtual void OnOnAllSourcesReachBottom(IEnumerable<WeightItem> weights) =>
+            OnAllSourcesReachBottom?.Invoke(this, new UpdateWeightEventArgs(weights));
     }
 }
