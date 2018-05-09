@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2043
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.LoadBalancing", "Agoda.LoadBalancing\Agoda.LoadBalancing.csproj", "{439AC4E5-773D-492F-9EE2-B24BA0986609}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.LoadBalancing.Test", "Agoda.LoadBalancing.Test\Agoda.LoadBalancing.Test.csproj", "{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {16A6D069-AEFB-4745-83DF-0EA259D456E6}
+	EndGlobalSection
+EndGlobal
