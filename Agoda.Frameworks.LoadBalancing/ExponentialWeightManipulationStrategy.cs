@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Immutable;
 
-namespace Agoda.LoadBalancing
+namespace Agoda.Frameworks.LoadBalancing
 {
     public class ExponentialWeightManipulationStrategy : IWeightManipulationStrategy
     {
@@ -16,11 +15,7 @@ namespace Agoda.LoadBalancing
             Magnitude = magnitude;
         }
 
-        public ImmutableDictionary<T, WeightItem> UpdateWeight<T>(
-            ImmutableDictionary<T, WeightItem> collection,
-            T source,
-            WeightItem originalWeight,
-            bool isSuccess)
+        public WeightItem UpdateWeight<T>(T source, WeightItem originalWeight, bool isSuccess)
         {
             var originialWeightValue = originalWeight.Weight;
             var newWeight = isSuccess
@@ -28,7 +23,7 @@ namespace Agoda.LoadBalancing
                 : originialWeightValue / Magnitude;
             // Convert.ToInt32 is Math.Round that returns int
             var delta = Convert.ToInt32(newWeight) - originialWeightValue;
-            return collection.SetItem(source, originalWeight.SetNewWeight(delta));
+            return originalWeight.SetNewWeight(delta);
         }
     }
 }

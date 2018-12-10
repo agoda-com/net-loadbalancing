@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Agoda.LoadBalancing
+namespace Agoda.Frameworks.LoadBalancing
 {
     public sealed class UpdateWeightEventArgs : EventArgs
     {

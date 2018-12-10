@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2043
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.LoadBalancing", "Agoda.LoadBalancing\Agoda.LoadBalancing.csproj", "{439AC4E5-773D-492F-9EE2-B24BA0986609}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.LoadBalancing", "Agoda.Frameworks.LoadBalancing\Agoda.Frameworks.LoadBalancing.csproj", "{D8E265D7-442C-4BE7-952E-9980D6EFD7A1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.LoadBalancing.Test", "Agoda.LoadBalancing.Test\Agoda.LoadBalancing.Test.csproj", "{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.DB", "Agoda.Frameworks.DB\Agoda.Frameworks.DB.csproj", "{2FFB888A-F59C-493A-932A-ADA3F45926D7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.LoadBalancing.Tests", "Agoda.Frameworks.LoadBalancing.Tests\Agoda.Frameworks.LoadBalancing.Tests.csproj", "{A2AB4916-A2D5-4B7E-852A-D8C743649850}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.DB.Tests", "Agoda.Frameworks.DB.Tests\Agoda.Frameworks.DB.Tests.csproj", "{1A04B5BB-0F08-4418-9767-549495836773}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +17,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{439AC4E5-773D-492F-9EE2-B24BA0986609}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04820893-0C1A-4130-B0EF-B5F3FD93D5FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8E265D7-442C-4BE7-952E-9980D6EFD7A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8E265D7-442C-4BE7-952E-9980D6EFD7A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8E265D7-442C-4BE7-952E-9980D6EFD7A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8E265D7-442C-4BE7-952E-9980D6EFD7A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FFB888A-F59C-493A-932A-ADA3F45926D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FFB888A-F59C-493A-932A-ADA3F45926D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FFB888A-F59C-493A-932A-ADA3F45926D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FFB888A-F59C-493A-932A-ADA3F45926D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2AB4916-A2D5-4B7E-852A-D8C743649850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2AB4916-A2D5-4B7E-852A-D8C743649850}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2AB4916-A2D5-4B7E-852A-D8C743649850}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2AB4916-A2D5-4B7E-852A-D8C743649850}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A04B5BB-0F08-4418-9767-549495836773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A04B5BB-0F08-4418-9767-549495836773}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A04B5BB-0F08-4418-9767-549495836773}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A04B5BB-0F08-4418-9767-549495836773}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

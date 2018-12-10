@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Agoda.LoadBalancing
+﻿namespace Agoda.Frameworks.LoadBalancing
 {
     public class SplitWeightManipulationStrategy : IWeightManipulationStrategy
     {
@@ -15,14 +13,10 @@ namespace Agoda.LoadBalancing
             Decrement = decrement;
         }
 
-        public ImmutableDictionary<T, WeightItem> UpdateWeight<T>(
-            ImmutableDictionary<T, WeightItem> collection,
-            T source,
-            WeightItem originalWeight,
-            bool isSuccess)
+        public WeightItem UpdateWeight<T>(T source, WeightItem originalWeight, bool isSuccess)
         {
             var strategy = isSuccess ? Increment : Decrement;
-            return strategy.UpdateWeight(collection, source, originalWeight, isSuccess);
+            return strategy.UpdateWeight(source, originalWeight, isSuccess);
         }
     }
 }

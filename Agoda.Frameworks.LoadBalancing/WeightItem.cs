@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Agoda.LoadBalancing
+namespace Agoda.Frameworks.LoadBalancing
 {
     public sealed class WeightItem
     {
@@ -17,11 +17,11 @@ namespace Agoda.LoadBalancing
             }
             if (weight < minWeight)
             {
-                throw new ArgumentException("weight must be equal or greater than minWeight", nameof(minWeight));
+                throw new ArgumentException("weight must be equal or greater than minWeight", nameof(weight));
             }
             if (weight > maxWeight)
             {
-                throw new ArgumentException("weight must be equal or lesser than maxWeight", nameof(minWeight));
+                throw new ArgumentException("weight must be equal or lesser than maxWeight", nameof(weight));
             }
 
             Weight = weight;
@@ -32,6 +32,29 @@ namespace Agoda.LoadBalancing
         public int Weight { get; }
         public int MinWeight { get; }
         public int MaxWeight { get; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is WeightItem item && Equals(item);
+        }
+
+        private bool Equals(WeightItem other)
+        {
+            return Weight == other.Weight &&
+                   MinWeight == other.MinWeight &&
+                   MaxWeight == other.MaxWeight;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Weight;
+                hashCode = (hashCode * 397) ^ MinWeight;
+                hashCode = (hashCode * 397) ^ MaxWeight;
+                return hashCode;
+            }
+        }
     }
 
     public static class WeightItemExtension
