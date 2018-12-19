@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.LoadBalanc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.DB.Tests", "Agoda.Frameworks.DB.Tests\Agoda.Frameworks.DB.Tests.csproj", "{1A04B5BB-0F08-4418-9767-549495836773}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agoda.Frameworks.Http", "Agoda.Frameworks.Http\Agoda.Frameworks.Http.csproj", "{EC72BFE9-C03A-4A5E-806E-44FF61C4C5C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agoda.Frameworks.Http.Tests", "Agoda.Frameworks.Http.Tests\Agoda.Frameworks.Http.Tests.csproj", "{06096CE9-4987-435F-A5DC-1C65CB536A24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{1A04B5BB-0F08-4418-9767-549495836773}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A04B5BB-0F08-4418-9767-549495836773}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A04B5BB-0F08-4418-9767-549495836773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC72BFE9-C03A-4A5E-806E-44FF61C4C5C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC72BFE9-C03A-4A5E-806E-44FF61C4C5C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC72BFE9-C03A-4A5E-806E-44FF61C4C5C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC72BFE9-C03A-4A5E-806E-44FF61C4C5C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06096CE9-4987-435F-A5DC-1C65CB536A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06096CE9-4987-435F-A5DC-1C65CB536A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06096CE9-4987-435F-A5DC-1C65CB536A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06096CE9-4987-435F-A5DC-1C65CB536A24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

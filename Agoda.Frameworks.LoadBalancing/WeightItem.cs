@@ -55,6 +55,11 @@ namespace Agoda.Frameworks.LoadBalancing
                 return hashCode;
             }
         }
+
+        public static WeightItem CreateDefaultItem()
+        {
+            return new WeightItem(1000, 1000);
+        }
     }
 
     public static class WeightItemExtension
