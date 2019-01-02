@@ -13,22 +13,55 @@ namespace Agoda.Frameworks.Http
         public HttpClient HttpClient { get; }
         public IResourceManager<string> UrlResourceManager { get; }
         public TimeSpan? Timeout { get; }
-        public int MaxRetry { get; }
+        private readonly Func<HttpResponseMessage, int> _isErrorResponse = _ => 0;
+        private readonly ShouldRetryPredicate _shouldRetry;
 
         public event EventHandler<HttpErrorEventArgs> OnError;
 
-        public RandomUrlHttpClient(string[] baseUrls, TimeSpan? timeout = null, int maxRetry = 3)
-            : this(new HttpClient(), baseUrls, timeout, maxRetry)
+        public RandomUrlHttpClient(
+            string[] baseUrls,
+            TimeSpan? timeout = null,
+            int maxRetry = 3,
+            Func<HttpResponseMessage, int> isErrorResponse = null)
+            : this(new HttpClient(), baseUrls, timeout, maxRetry, isErrorResponse)
         {
         }
 
-        public RandomUrlHttpClient(HttpClient httpClient, string[] baseUrls, TimeSpan? timeout, int maxRetry)
+        public RandomUrlHttpClient(
+            HttpClient httpClient,
+            string[] baseUrls,
+            TimeSpan? timeout,
+            int maxRetry,
+            Func<HttpResponseMessage, int> isErrorResponse)
+            : this(httpClient, baseUrls, timeout, isErrorResponse, GetRetryCountPredicate(maxRetry))
+        {
+        }
+
+        public RandomUrlHttpClient(
+            HttpClient httpClient,
+            string[] baseUrls,
+            TimeSpan? timeout,
+            Func<HttpResponseMessage, int> isErrorResponse,
+            ShouldRetryPredicate shouldRetry)
         {
             HttpClient = httpClient;
             UrlResourceManager = CreateResourceManager(baseUrls);
             Timeout = timeout;
-            MaxRetry = maxRetry;
+            if (isErrorResponse != null)
+            {
+                _isErrorResponse = isErrorResponse;
+            }
+            _shouldRetry = shouldRetry ?? throw new ArgumentNullException(nameof(shouldRetry));
         }
+
+        private static ShouldRetryPredicate GetRetryCountPredicate(int maxRetry) => (attemptCount, e) =>
+        {
+            if (e is TimeoutException || e is TransientHttpRequestException)
+            {
+                return attemptCount < maxRetry;
+            }
+            return false;
+        };
 
         public void UpdateBaseUrls(string[] baseUrls)
         {
@@ -51,15 +84,17 @@ namespace Agoda.Frameworks.Http
             }
         }
 
-        public Task<HttpResponseMessage> PostAsync(string url, HttpContent content)
-        {
-            return SendAsync(url, uri => HttpClient.PostAsync(uri, content));
-        }
+        public Task<HttpResponseMessage> PostAsync(string url, HttpContent content) =>
+            SendAsync(url, uri => HttpClient.PostAsync(uri, content));
 
-        public Task<HttpResponseMessage> GetAsync(string url)
-        {
-            return SendAsync(url, uri => HttpClient.GetAsync(uri));
-        }
+        public Task<HttpResponseMessage> GetAsync(string url) =>
+            SendAsync(url, uri => HttpClient.GetAsync(uri));
+
+        public Task<HttpResponseMessage> PutAsync(string url, HttpContent content) =>
+            SendAsync(url, uri => HttpClient.PutAsync(uri, content));
+
+        public Task<HttpResponseMessage> DeleteAsync(string url) =>
+            SendAsync(url, uri => HttpClient.DeleteAsync(uri));
 
         private Task<HttpResponseMessage> SendAsync(string url, Func<string, Task<HttpResponseMessage>> send)
         {
@@ -83,6 +118,11 @@ namespace Agoda.Frameworks.Http
                                 $"Response status code does not indicate success: ${res.StatusCode}");
                         }
                         res.EnsureSuccessStatusCode();
+                        var errorCode = _isErrorResponse(res);
+                        if (errorCode > 0)
+                        {
+                            throw new HttpErrorResponseException(errorCode);
+                        }
                         return res;
                     }
                     catch (TaskCanceledException e)
@@ -92,14 +132,7 @@ namespace Agoda.Frameworks.Http
                     }
                 }
 
-            }, (attemptCount, e) =>
-            {
-                if (e is TimeoutException || e is TransientHttpRequestException)
-                {
-                    return attemptCount < MaxRetry;
-                }
-                return false;
-            }, RaiseOnError);
+            }, _shouldRetry, RaiseOnError);
         }
 
         private static bool IsTransientException(Exception e)

@@ -26,7 +26,8 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
                 httpclient,
                 new[] { "http://test/1", "http://test/2" },
                 null,
-                3);
+                3,
+                null);
             var res = await client.GetAsync("api/55");
             var content = await res.Content.ReadAsStringAsync();
 
@@ -55,7 +56,8 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
                 httpclient,
                 new[] { "http://test/1", "http://test/2" },
                 null,
-                3);
+                3,
+                null);
             var res = await client.PostAsync("api/55", new StringContent("55"));
             var content = await res.Content.ReadAsStringAsync();
 
@@ -81,7 +83,8 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
                 httpclient,
                 new[] { "http://test/1", "http://test/2" },
                 null,
-                3);
+                3,
+                null);
 
             Assert.ThrowsAsync<TransientHttpRequestException>(
                 () => client.PostAsync("api/55", new StringContent("55")));
