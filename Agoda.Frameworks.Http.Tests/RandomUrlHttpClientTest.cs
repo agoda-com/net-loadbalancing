@@ -65,7 +65,7 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
         }
 
         [Test]
-        public async Task TestRetry()
+        public void TestRetry()
         {
             var mockHttp = new MockHttpMessageHandler();
 
