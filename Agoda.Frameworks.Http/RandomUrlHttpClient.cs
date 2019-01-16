@@ -30,9 +30,9 @@ namespace Agoda.Frameworks.Http
         public RandomUrlHttpClient(
             HttpClient httpClient,
             string[] baseUrls,
-            TimeSpan? timeout,
-            int maxRetry,
-            Func<HttpResponseMessage, int> isErrorResponse)
+            TimeSpan? timeout = null,
+            int maxRetry = 3,
+            Func<HttpResponseMessage, int> isErrorResponse = null)
             : this(httpClient, baseUrls, timeout, isErrorResponse, GetRetryCountPredicate(maxRetry))
         {
         }
