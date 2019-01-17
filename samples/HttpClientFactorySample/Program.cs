@@ -71,8 +71,6 @@ namespace HttpClientFactorySample
             public async Task<HttpResponseMessage> GetJson()
             {
                 var response = await HttpClient.GetAsync("/sites").ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
-
                 return response;
             }
         }

@@ -13,7 +13,7 @@ namespace Agoda.Frameworks.Http
         public HttpClient HttpClient { get; }
         public IResourceManager<string> UrlResourceManager { get; }
         public TimeSpan? Timeout { get; }
-        private readonly Func<HttpResponseMessage, int> _isErrorResponse = _ => 0;
+        private readonly Func<HttpResponseMessage, string, int> _isErrorResponse = (_1, _2) => 0;
         private readonly ShouldRetryPredicate _shouldRetry;
 
         public event EventHandler<HttpErrorEventArgs> OnError;
@@ -22,7 +22,7 @@ namespace Agoda.Frameworks.Http
             string[] baseUrls,
             TimeSpan? timeout = null,
             int maxRetry = 3,
-            Func<HttpResponseMessage, int> isErrorResponse = null)
+            Func<HttpResponseMessage, string, int> isErrorResponse = null)
             : this(new HttpClient(), baseUrls, timeout, maxRetry, isErrorResponse)
         {
         }
@@ -32,7 +32,7 @@ namespace Agoda.Frameworks.Http
             string[] baseUrls,
             TimeSpan? timeout = null,
             int maxRetry = 3,
-            Func<HttpResponseMessage, int> isErrorResponse = null)
+            Func<HttpResponseMessage, string, int> isErrorResponse = null)
             : this(httpClient, baseUrls, timeout, isErrorResponse, GetRetryCountPredicate(maxRetry))
         {
         }
@@ -41,7 +41,7 @@ namespace Agoda.Frameworks.Http
             HttpClient httpClient,
             string[] baseUrls,
             TimeSpan? timeout,
-            Func<HttpResponseMessage, int> isErrorResponse,
+            Func<HttpResponseMessage, string, int> isErrorResponse,
             ShouldRetryPredicate shouldRetry)
         {
             HttpClient = httpClient;
@@ -118,7 +118,7 @@ namespace Agoda.Frameworks.Http
                                 $"Response status code does not indicate success: ${res.StatusCode}");
                         }
                         res.EnsureSuccessStatusCode();
-                        var errorCode = _isErrorResponse(res);
+                        var errorCode = _isErrorResponse(res, await res.Content.ReadAsStringAsync());
                         if (errorCode > 0)
                         {
                             throw new HttpErrorResponseException(errorCode);

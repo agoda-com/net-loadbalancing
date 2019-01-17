@@ -17,7 +17,7 @@ namespace MultiTypedClient
             HttpClient = new RandomUrlHttpClient(httpClient, new[]
             {
                 "https://api.stackexchange.com/2.2"
-            }, isErrorResponse: (msg) =>
+            }, isErrorResponse: (msg, body) =>
             {
                 // customize error predicate
                 // 0 for non-error
@@ -31,8 +31,6 @@ namespace MultiTypedClient
         public async Task<string> GetJson()
         {
             var response = await HttpClient.GetAsync("/sites").ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-
             return await response.Content.ReadAsStringAsync();
         }
     }

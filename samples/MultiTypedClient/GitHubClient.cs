@@ -16,7 +16,7 @@ namespace MultiTypedClient
             HttpClient = new RandomUrlHttpClient(httpClient, new[]
             {
                 "https://github.agodadev.io/api/v3"
-            }, isErrorResponse: (msg) =>
+            }, isErrorResponse: (msg, body) =>
             {
                 // customize error predicate
                 // 0 for non-error
@@ -30,8 +30,6 @@ namespace MultiTypedClient
         public async Task<string> GetJson()
         {
             var response = await HttpClient.GetAsync("/organizations").ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-
             return await response.Content.ReadAsStringAsync();
         }
     }
