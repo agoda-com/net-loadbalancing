@@ -43,8 +43,6 @@ namespace HttpClientFactorySample
         {
             services.AddHttpClient("stackexchange", c =>
             {
-                c.BaseAddress = new Uri("https://api.stackexchange.com/2.2");
-
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
                 c.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
             })

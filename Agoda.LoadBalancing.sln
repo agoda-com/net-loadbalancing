@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "samples\Benchm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpClientFactorySample", "samples\HttpClientFactorySample\HttpClientFactorySample.csproj", "{1C23FCB4-EC50-4CD2-8823-C0413E29E580}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiTypedClient", "samples\MultiTypedClient\MultiTypedClient.csproj", "{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,5 +75,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580} = {8965557D-C1E0-4647-934D-4DDA544A9DF4}
 		{C04E23D9-A677-4923-9788-C1B9AE2F1DC5} = {8965557D-C1E0-4647-934D-4DDA544A9DF4}
+		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813} = {8965557D-C1E0-4647-934D-4DDA544A9DF4}
 	EndGlobalSection
 EndGlobal
