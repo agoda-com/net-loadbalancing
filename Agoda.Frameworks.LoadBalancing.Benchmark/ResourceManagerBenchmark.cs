@@ -8,7 +8,7 @@ namespace Agoda.Frameworks.LoadBalancing.Benchmark
 {
     
     [CsvMeasurementsExporter, CsvExporter, RPlotExporter]
-    public class ResourceManagerBenchmark
+    public class UpdateWeightBenchmark
     {
 
         [Params(100, 500, 1000)]
@@ -24,15 +24,6 @@ namespace Agoda.Frameworks.LoadBalancing.Benchmark
 
             var resourceManager = new ResourceManager<string>(dict, new AgodaWeightManipulationStrategy());
             resourceManager.UpdateWeight("url1", true);
-        }
-
-        [Benchmark]
-        public void UpdateResource_Benchmark()
-        {
-            var urls = new List<string> { "url1", "url2", "url3", "url4" };
-            var dict = urls.ToImmutableDictionary(x => x, x => WeightItem.CreateDefaultItem());
-            var resourceManager = new ResourceManager<string>(dict, new AgodaWeightManipulationStrategy());
-            resourceManager.UpdateResources(dict);
         }
     }
 }

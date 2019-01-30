@@ -7,7 +7,7 @@ namespace Agoda.Frameworks.LoadBalancing.Benchmark
     {
         public static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<ResourceManagerBenchmark>();
+            var summary = BenchmarkRunner.Run<UpdateWeightBenchmark>();
         }
     }
 }
