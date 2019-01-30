@@ -75,28 +75,11 @@ namespace Agoda.Frameworks.LoadBalancing
 
         public void UpdateWeight(TSource source, bool isSuccess)
         {
-            ImmutableDictionary<TSource, WeightItem> oldCollection;
-            ImmutableDictionary<TSource, WeightItem> newCollection;
-            lock (_collection)
+            if (_collection.ContainsKey(source))
             {
-                oldCollection = _collection;
-                if (oldCollection.TryGetValue(source, out var weight))
-                {
-                    newCollection = oldCollection.SetItem(
-                        source,
-                        _weightManipulationStrategy.UpdateWeight(
-                            source,
-                            weight,
-                            isSuccess));
-                    _collection = newCollection;
-                }
-                else
-                {
-                    newCollection = oldCollection;
-                }
+                _collection[source].UpdateWeight(_weightManipulationStrategy, isSuccess);
+                RaiseWeightUpdateEvent(_collection);
             }
-
-            RaiseWeightUpdateEvent(oldCollection, newCollection);
         }
 
         public void UpdateResources(IReadOnlyDictionary<TSource, WeightItem> collection)
@@ -116,20 +99,19 @@ namespace Agoda.Frameworks.LoadBalancing
                             : x.Value);
                 _collection = newCollection;
             }
-            RaiseWeightUpdateEvent(oldCollection, newCollection);
+
+            if(oldCollection != newCollection)
+            {
+                RaiseWeightUpdateEvent(newCollection);
+            }
         }
 
-        private void RaiseWeightUpdateEvent(
-            ImmutableDictionary<TSource, WeightItem> oldCollection,
-            ImmutableDictionary<TSource, WeightItem> newCollection)
+        private void RaiseWeightUpdateEvent(ImmutableDictionary<TSource, WeightItem> newCollection)
         {
-            if (oldCollection != newCollection)
+            RaiseOnUpdateWeight(newCollection.Values);
+            if (newCollection.Values.All(x => x.Weight == x.MinWeight))
             {
-                RaiseOnUpdateWeight(newCollection.Values);
-                if (newCollection.Values.All(x => x.Weight == x.MinWeight))
-                {
-                    RaiseOnAllSourcesReachBottom(newCollection.Values);
-                }
+                RaiseOnAllSourcesReachBottom(newCollection.Values);
             }
         }
 

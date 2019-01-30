@@ -9,7 +9,7 @@
             Delta = delta;
         }
 
-        public WeightItem UpdateWeight<T>(T source, WeightItem originalWeight, bool isSuccess)
+        public WeightItem UpdateWeight(WeightItem originalWeight, bool isSuccess)
         {
             var delta = Delta * (isSuccess ? 1 : -1);
             return originalWeight.SetNewWeight(delta);

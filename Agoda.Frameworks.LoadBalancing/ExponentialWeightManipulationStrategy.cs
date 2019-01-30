@@ -15,7 +15,7 @@ namespace Agoda.Frameworks.LoadBalancing
             Magnitude = magnitude;
         }
 
-        public WeightItem UpdateWeight<T>(T source, WeightItem originalWeight, bool isSuccess)
+        public WeightItem UpdateWeight(WeightItem originalWeight, bool isSuccess)
         {
             var originialWeightValue = originalWeight.Weight;
             var newWeight = isSuccess

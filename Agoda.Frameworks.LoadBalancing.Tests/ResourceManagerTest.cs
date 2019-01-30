@@ -18,12 +18,11 @@ namespace Agoda.Frameworks.LoadBalancing.Test
         {
             _dict = new Dictionary<string, WeightItem>()
             {
-                {"tgt", new WeightItem(10, 10)}
+                {"tgt", new WeightItem(10, 100)}
             }.ToImmutableDictionary();
             _newWeightItem = new WeightItem(50, 100);
             _strats = new Mock<IWeightManipulationStrategy>();
             _strats.Setup(x => x.UpdateWeight(
-                    It.IsAny<string>(),
                     It.IsAny<WeightItem>(),
                     It.IsAny<bool>()))
                 .Returns(() => _newWeightItem);
@@ -32,7 +31,6 @@ namespace Agoda.Frameworks.LoadBalancing.Test
         [Test]
         public void UpdateWeight_OnUpdateWeight_Unchanged()
         {
-            _newWeightItem = _dict["tgt"];
             var mgr = new ResourceManager<string>(
                 _dict,
                 _strats.Object);
@@ -42,14 +40,13 @@ namespace Agoda.Frameworks.LoadBalancing.Test
                 onUpdateWeightCount++;
             };
 
-            mgr.UpdateWeight("tgt", true);
+            mgr.UpdateWeight("tgt2", true);
 
             Assert.AreEqual(0, onUpdateWeightCount);
             _strats.Verify(x => x.UpdateWeight(
-                    "tgt",
-                    _dict["tgt"],
+                    It.IsAny<WeightItem>(),
                     true),
-                Times.Once);
+                Times.Never);
         }
 
         [Test]
@@ -68,7 +65,6 @@ namespace Agoda.Frameworks.LoadBalancing.Test
 
             Assert.AreEqual(1, onUpdateWeightCount);
             _strats.Verify(x => x.UpdateWeight(
-                    "tgt",
                     _dict["tgt"],
                     true),
                 Times.Once);
@@ -91,7 +87,6 @@ namespace Agoda.Frameworks.LoadBalancing.Test
 
             Assert.AreEqual(1, onEventRaised);
             _strats.Verify(x => x.UpdateWeight(
-                    "tgt",
                     _dict["tgt"],
                     false),
                 Times.Once);

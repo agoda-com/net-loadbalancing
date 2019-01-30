@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Threading;
 
 namespace Agoda.Frameworks.LoadBalancing
 {
     public sealed class WeightItem
     {
+        private volatile int _weight;
+
         public WeightItem(int weight, int maxWeight)
             : this(weight, maxWeight, 1)
         {
@@ -24,12 +27,12 @@ namespace Agoda.Frameworks.LoadBalancing
                 throw new ArgumentException("weight must be equal or lesser than maxWeight", nameof(weight));
             }
 
-            Weight = weight;
             MaxWeight = maxWeight;
             MinWeight = minWeight;
+            _weight = weight;
         }
 
-        public int Weight { get; }
+        public int Weight => _weight;
         public int MinWeight { get; }
         public int MaxWeight { get; }
 
@@ -59,6 +62,16 @@ namespace Agoda.Frameworks.LoadBalancing
         public static WeightItem CreateDefaultItem()
         {
             return new WeightItem(1000, 1000);
+        }
+
+        public void UpdateWeight(IWeightManipulationStrategy weightManipulationStrategy, bool isSuccess)
+        {
+            int initialWeight, newWeight;
+            do
+            {
+                initialWeight = _weight;
+                newWeight = weightManipulationStrategy.UpdateWeight(this, isSuccess).Weight;
+            } while (initialWeight != Interlocked.CompareExchange(ref _weight, newWeight, initialWeight));
         }
     }
 
