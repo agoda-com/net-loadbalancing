@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Agoda.Frameworks.LoadBalancing.Benchmark
 {
@@ -11,19 +12,34 @@ namespace Agoda.Frameworks.LoadBalancing.Benchmark
     public class UpdateWeightBenchmark
     {
 
-        [Params(100, 500, 1000)]
-        public int weight;
+        [Params(10, 50, 100)]
+        public int numberOfRoutes;
+
+        [Params(10, 100, 1000, 10000)]
+        public int numberOfRuns;
+
+        private Dictionary<string, WeightItem> Resource;
+        private ResourceManager<string> ResourceManager;
+
+        [GlobalSetup]
+        public void Setup()
+        {
+            Resource = new Dictionary<string, WeightItem>();
+            for (var i = 0; i < numberOfRoutes; i++)
+            {
+                Resource.Add($"url_{i}", WeightItem.CreateDefaultItem());
+            }
+            ResourceManager = new ResourceManager<string>(Resource.ToImmutableDictionary(), new AgodaWeightManipulationStrategy());
+        }
+
 
         [Benchmark]
         public void UpdateWeight_Benchmark()
         {
-            var dict = new Dictionary<string, WeightItem>
-            {
-                {"url1", new WeightItem(weight, 1000)}
-            }.ToImmutableDictionary();
-
-            var resourceManager = new ResourceManager<string>(dict, new AgodaWeightManipulationStrategy());
-            resourceManager.UpdateWeight("url1", true);
+            Parallel.For(0, numberOfRuns, (i) => {
+                var rand = new Random();
+                ResourceManager.UpdateWeight($"url_{rand.Next(0, numberOfRoutes)}", rand.NextDouble() >= 0.5);
+            });
         }
     }
 }
