@@ -16,7 +16,25 @@ Agoda.Frameworks.LoadBalancing is a .NET Standard library that provides logic fo
 
 [docs](./docs)
 
+## Support & Feature Request
+
+Send messages to @200 on Agoda Slack.
+
 ## Install
+
+### Http
+
+```
+dotnet add Agoda.Frameworks.Http
+```
+
+### DB
+
+```
+dotnet add Agoda.Frameworks.DB
+```
+
+### LoadBalancing Core
 
 ```
 dotnet add Agoda.Frameworks.LoadBalancing
@@ -33,3 +51,4 @@ dotnet build
 ```
 dotnet test
 ```
+
