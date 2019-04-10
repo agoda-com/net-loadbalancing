@@ -2,8 +2,6 @@
 
 Agoda.Frameworks.LoadBalancing is a .NET Standard library that provides logic for handling retry and load balancing.
 
-[TeamCity](https://teamcity.agodadev.io/project.html?projectId=AgodaFrontEnd_Libraries_AgodaFrameworksLoadBalancing&branch_AgodaFrontEnd_Libraries_AgodaFrameworksLoadBalancing=__all_branches__)
-
 ## Features
 
 - Weight-adjusted random selection for data sources
@@ -15,10 +13,6 @@ Agoda.Frameworks.LoadBalancing is a .NET Standard library that provides logic fo
 ## Documentations
 
 [docs](./docs)
-
-## Support & Feature Request
-
-Send messages to @200 on Agoda Slack.
 
 ## Install
 
