@@ -1,3 +1,9 @@
+
+| Build | Status |
+|--------|--------|
+| Project | [![Build status](https://ci.appveyor.com/api/projects/status/l72mp8rhenjc9n42?svg=true)](https://ci.appveyor.com/project/jenol/net-loadbalancing) | 
+| Master | [![Build status](https://ci.appveyor.com/api/projects/status/l72mp8rhenjc9n42/branch/master?svg=true)](https://ci.appveyor.com/project/jenol/net-loadbalancing/branch/master) | 
+
 ## Overview
 
 Agoda.Frameworks.LoadBalancing is a .NET Standard library that provides logic for handling retry and load balancing.
