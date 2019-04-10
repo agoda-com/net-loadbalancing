@@ -6,7 +6,6 @@ cache:
   - packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
 
 before_build:
-  - ps: cd ..
   - nuget Agoda.LoadBalancing.sln
 
 test: off
