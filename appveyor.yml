@@ -1,12 +1,5 @@
-# Test against the latest version of this Node.js version
-environment:
-  nodejs_version: "8"
-
-cache: 
-  - packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
-
 before_build:
-  - nuget .\Agoda.LoadBalancing.sln
+  - nuget restore
 
 test: off
 
