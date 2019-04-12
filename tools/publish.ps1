@@ -1,24 +1,24 @@
 #$ErrorActionPreference = "Stop"
 
-$version = "1.0"#$env:APPVEYOR_BUILD_VERSION
+$version = $env:APPVEYOR_BUILD_VERSION
 
-<#
+
 if(!$version) 
 {
 	Write-Output "Missing version: $version"
 	Exit 1
 }
-#>
+
 
 $branch = $env:APPVEYOR_REPO_BRANCH
 
-<#
+
 if(!$branch) 
 {
 	Write-Output "Missing branch: $branch"
 	Exit 1
 }
-#>
+
 
 if($branch -ne "master") 
 {
@@ -56,16 +56,16 @@ function Append-FileNode($files, $file, $lib) {
     $src.Value = $file.FullName
     $target = $files.OwnerDocument.CreateAttribute("target")
     $target.Value = $lib
-    $node.Attributes.Append($src)
-    $node.Attributes.Append($target)
-    $files.AppendChild($node)   
+    [void]$node.Attributes.Append($src)
+    [void]$node.Attributes.Append($target)
+    [void]$files.AppendChild($node)   
 }
 
 $deployables.GetEnumerator() | % {
     $name = $_.Value
     $projectPath = Join-Path $scriptDir $name    
     $csProjPath = Join-Path $projectPath "$name.csproj"
-    [xml]$proj = gc $csProjPath -Raw
+    [xml]$proj = gc $csProjPath -Raw    
     
     cd $projectPath
     $nuspecPath = Join-Path $projectPath "$name.nuspec"
@@ -77,12 +77,12 @@ $deployables.GetEnumerator() | % {
     [xml]$nuspec = gc $nuspecPath -Raw
     $meta = $nuspec.package.metadata
     $meta.id = $name
-    $meta.title = $name
-    $meta.authors = "Agoda"
-    $meta.owners = "Agoda"
-    $meta.projectUrl = "https://github.com/agoda-com/net-loadbalancing"
+    $meta.title = $name    
     $meta.version = $version
-    $meta.description = "$name $version"
+    $meta.authors = [string]$proj.Project.PropertyGroup.Authors
+    $meta.owners = $meta.authors
+    $meta.projectUrl = [string]$proj.Project.PropertyGroup.PackageProjectUrl
+    $meta.description = [string]$proj.Project.PropertyGroup.Description
     @("licenseUrl", "iconUrl", "tags", "releaseNotes") | % {
         [void]$meta.RemoveChild($meta.SelectSingleNode($_))
     }
@@ -109,5 +109,5 @@ $deployables.GetEnumerator() | % {
 
     $nuspec.Save($nuspecPath)
 
-    nuget pack $nuspecPath -Version $version
+	dotnet pack -c Release -p:PackageVersion=$version
 }

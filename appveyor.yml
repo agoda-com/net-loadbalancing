@@ -1,5 +1,5 @@
 before_build:
-  - nuget restore
+  - dotnet restore
 
 test: off
 
