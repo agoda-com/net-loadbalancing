@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Authors>mobapp</Authors>
+    <Authors>Agoda</Authors>
     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
+    <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
+    <Description>Agoda.Frameworks.DB</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.5" />
