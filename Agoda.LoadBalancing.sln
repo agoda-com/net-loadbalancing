@@ -11,17 +11,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.LoadBalanc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.DB.Tests", "Agoda.Frameworks.DB.Tests\Agoda.Frameworks.DB.Tests.csproj", "{1A04B5BB-0F08-4418-9767-549495836773}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agoda.Frameworks.Http", "Agoda.Frameworks.Http\Agoda.Frameworks.Http.csproj", "{EC72BFE9-C03A-4A5E-806E-44FF61C4C5C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.Http", "Agoda.Frameworks.Http\Agoda.Frameworks.Http.csproj", "{EC72BFE9-C03A-4A5E-806E-44FF61C4C5C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agoda.Frameworks.Http.Tests", "Agoda.Frameworks.Http.Tests\Agoda.Frameworks.Http.Tests.csproj", "{06096CE9-4987-435F-A5DC-1C65CB536A24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agoda.Frameworks.Http.Tests", "Agoda.Frameworks.Http.Tests\Agoda.Frameworks.Http.Tests.csproj", "{06096CE9-4987-435F-A5DC-1C65CB536A24}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{8965557D-C1E0-4647-934D-4DDA544A9DF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "samples\Benchmark\Benchmark.csproj", "{C04E23D9-A677-4923-9788-C1B9AE2F1DC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpClientFactorySample", "samples\HttpClientFactorySample\HttpClientFactorySample.csproj", "{1C23FCB4-EC50-4CD2-8823-C0413E29E580}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpClientFactorySample", "samples\HttpClientFactorySample\HttpClientFactorySample.csproj", "{1C23FCB4-EC50-4CD2-8823-C0413E29E580}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiTypedClient", "samples\MultiTypedClient\MultiTypedClient.csproj", "{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiTypedClient", "samples\MultiTypedClient\MultiTypedClient.csproj", "{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,28 +51,21 @@ Global
 		{06096CE9-4987-435F-A5DC-1C65CB536A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06096CE9-4987-435F-A5DC-1C65CB536A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06096CE9-4987-435F-A5DC-1C65CB536A24}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C04E23D9-A677-4923-9788-C1B9AE2F1DC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C04E23D9-A677-4923-9788-C1B9AE2F1DC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C04E23D9-A677-4923-9788-C1B9AE2F1DC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C04E23D9-A677-4923-9788-C1B9AE2F1DC5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C23FCB4-EC50-4CD2-8823-C0413E29E580}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580}.Release|Any CPU.Build.0 = Release|Any CPU
 		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {16A6D069-AEFB-4745-83DF-0EA259D456E6}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1C23FCB4-EC50-4CD2-8823-C0413E29E580} = {8965557D-C1E0-4647-934D-4DDA544A9DF4}
-		{C04E23D9-A677-4923-9788-C1B9AE2F1DC5} = {8965557D-C1E0-4647-934D-4DDA544A9DF4}
 		{33B2E81D-34AE-405F-BFDC-66E0FD2C0813} = {8965557D-C1E0-4647-934D-4DDA544A9DF4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {16A6D069-AEFB-4745-83DF-0EA259D456E6}
 	EndGlobalSection
 EndGlobal

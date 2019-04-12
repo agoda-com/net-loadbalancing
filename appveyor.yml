@@ -1,0 +1,23 @@
+before_build:
+  - dotnet restore
+
+test: off
+
+image: Visual Studio 2017
+
+build:
+  project: Agoda.LoadBalancing.sln
+
+after_build:
+  - ps: .\tools\publish.ps1
+
+artifacts:
+  - path: '**\*.nupkg'
+    name: NugetPackage
+  
+deploy:
+  provider: NuGet
+  api_key:
+    secure: g5JNOfRkIpNjLPxGk2yfmG+RLPRkhqT71N11Hfx9ieRb90bUnPl0grIJpmFvwz7k
+  skip_symbols: true
+  artifact: /.*\.nupkg/

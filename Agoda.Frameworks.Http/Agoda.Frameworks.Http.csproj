@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
+    <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
+    <Authors>Agoda</Authors>
+    <Product>Agoda.Frameworks.Http</Product>
+    <Company>Agoda</Company>
+    <Description>Agoda.Frameworks.Http</Description>
   </PropertyGroup>
 
   <ItemGroup>
