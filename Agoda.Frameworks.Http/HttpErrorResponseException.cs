@@ -1,13 +1,22 @@
 ﻿using System;
+using System.Net.Http;
+
 namespace Agoda.Frameworks.Http
 {
-    public class HttpErrorResponseException : Exception
+    public class HttpErrorResponseException : RouteResException
     {
-        public HttpErrorResponseException(int code)
-        {
-            Code = code;
-        }
+        public int Code => (int)Response.StatusCode;
 
-        public int Code { get; }
+        public HttpErrorResponseException(
+            string url,
+            string combinedUrl,
+            HttpResponseMessage res)
+            : base(
+                url,
+                combinedUrl,
+                $"Response status code does not indicate success: ${res.StatusCode}",
+                res)
+        {
+        }
     }
 }

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Agoda</Authors>
+    <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
+    <Company>Agoda</Company>
+    <Description>Agoda.Frameworks.LoadBalancing</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Agoda.Frameworks.Http\Agoda.Frameworks.Http.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -96,9 +97,34 @@ namespace Agoda.Frameworks.Http
         public Task<HttpResponseMessage> DeleteAsync(string url) =>
             SendAsync(url, uri => HttpClient.DeleteAsync(uri));
 
-        private Task<HttpResponseMessage> SendAsync(string url, Func<string, Task<HttpResponseMessage>> send)
+        public Task<HttpResponseMessage> SendAsync(
+            string url,
+            Func<string, HttpRequestMessage> requestMsg) =>
+            SendAsync(url, uri => HttpClient.SendAsync(requestMsg(url)));
+
+        public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
+            string url,
+            Func<string, HttpRequestMessage> requestMsg) =>
+            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(requestMsg(url)));
+
+        private async Task<HttpResponseMessage> SendAsync(
+            string url,
+            Func<string, Task<HttpResponseMessage>> send)
         {
-            return UrlResourceManager.ExecuteAsync(async (source, _) =>
+            var results = await SendAsyncWithDiag(url, send);
+            var result = results.Last();
+            if (result.IsError)
+            {
+                throw result.Exception;
+            }
+            return result.Result;
+        }
+
+        private Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
+            string url,
+            Func<string, Task<HttpResponseMessage>> send)
+        {
+            return UrlResourceManager.ExecuteAsyncWithDiag(async (source, _) =>
             {
                 var combinedUrl = $"{source.TrimEnd('/')}/{url.TrimStart('/')}";
                 // Special timeout handling for HttpClient
@@ -114,32 +140,35 @@ namespace Agoda.Frameworks.Http
                         if (IsTransientHttpStatusCode(res.StatusCode))
                         {
                             throw new TransientHttpRequestException(
-                                res.StatusCode,
+                                url,
+                                combinedUrl, 
+                                res,
                                 $"Response status code does not indicate success: ${res.StatusCode}");
                         }
-                        res.EnsureSuccessStatusCode();
+                        if (!res.IsSuccessStatusCode)
+                        {
+                            throw new HttpErrorResponseException(
+                                url,
+                                combinedUrl,
+                                res);
+                        }
                         var errorCode = _isErrorResponse(res, await res.Content.ReadAsStringAsync());
                         if (errorCode > 0)
                         {
-                            throw new HttpErrorResponseException(errorCode);
+                            throw new HttpErrorResponseException(
+                                url,
+                                combinedUrl,
+                                res);
                         }
                         return res;
                     }
                     catch (TaskCanceledException e)
                         when (!cts.Token.IsCancellationRequested)
                     {
-                        throw new TimeoutException("Operation timeout", e);
+                        throw new RequestTimeoutException(url, combinedUrl, "Operation timeout", e);
                     }
                 }
-
             }, _shouldRetry, RaiseOnError);
-        }
-
-        private static bool IsTransientException(Exception e)
-        {
-            return e is WebException webException &&
-                webException.Response is HttpWebResponse res &&
-                IsTransientHttpStatusCode(res.StatusCode);
         }
 
         private static bool IsTransientHttpStatusCode(HttpStatusCode code)
