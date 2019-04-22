@@ -34,6 +34,7 @@ cd $toolsPath
 $deployables = @{
     "DB" = "Agoda.Frameworks.DB"
     "Http" = "Agoda.Frameworks.Http"
+    "Http.AutoRestExt" = "Agoda.Frameworks.Http.AutoRestExt"
     "LoadBalancing" = "Agoda.Frameworks.LoadBalancing"
 }
 
