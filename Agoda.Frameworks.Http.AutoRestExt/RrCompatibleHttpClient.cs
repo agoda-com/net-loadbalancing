@@ -73,7 +73,7 @@ namespace Agoda.Frameworks.Http.AutoRestExt
 
         private async Task<ExecuteResult> MsgToExecuteResult(
             RetryActionResult<string, HttpResponseMessage> res,
-            IEnumerable<ExecuteResult> prevResults)
+            List<ExecuteResult> prevResults)
         {
             var response = GetResponse(res);
             var body = response != null
@@ -91,7 +91,7 @@ namespace Agoda.Frameworks.Http.AutoRestExt
                 isScala,
                 !res.IsError,
                 // Duplicate current list
-                prevResults.ToList(),
+                prevResults,
                 GetExceptionList(res));
         }
 

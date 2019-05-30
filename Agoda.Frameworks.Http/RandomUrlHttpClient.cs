@@ -100,12 +100,12 @@ namespace Agoda.Frameworks.Http
         public Task<HttpResponseMessage> SendAsync(
             string url,
             Func<string, HttpRequestMessage> requestMsg) =>
-            SendAsync(url, uri => HttpClient.SendAsync(requestMsg(url)));
+            SendAsync(url, uri => HttpClient.SendAsync(requestMsg(uri)));
 
         public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
             string url,
             Func<string, HttpRequestMessage> requestMsg) =>
-            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(requestMsg(url)));
+            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(requestMsg(uri)));
 
         private async Task<HttpResponseMessage> SendAsync(
             string url,
