@@ -1,11 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     <Authors>Agoda</Authors>
     <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
     <Company>Agoda</Company>
     <Description>Agoda.Frameworks.LoadBalancing</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
