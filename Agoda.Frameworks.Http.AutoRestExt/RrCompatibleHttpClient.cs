@@ -18,10 +18,29 @@ namespace Agoda.Frameworks.Http.AutoRestExt
             string[] baseUrls,
             TimeSpan? timeout,
             int retryCount,
+            HttpMessageHandler handler)
+        {
+            _isGzip = handler is HttpClientHandler httpHandler &&
+                (httpHandler?.AutomaticDecompression ?? 0) > 0;
+            _httpClient = new RandomUrlHttpClient(
+                new HttpClient(handler, true),
+                baseUrls,
+                timeout ?? TimeSpan.FromMilliseconds(1000),
+                retryCount);
+        }
+
+        public RrCompatibleHttpClient(
+            string[] baseUrls,
+            TimeSpan? timeout,
+            int retryCount,
             bool isGzip,
             bool ignoreSslPolicyErrors = false)
+            : this(baseUrls, timeout, retryCount, CreateDefaultHandler(isGzip, ignoreSslPolicyErrors))
         {
-            _isGzip = isGzip;
+        }
+
+        private static HttpClientHandler CreateDefaultHandler(bool isGzip, bool ignoreSslPolicyErrors)
+        {
             var handler = new HttpClientHandler();
             if (isGzip)
             {
@@ -33,11 +52,7 @@ namespace Agoda.Frameworks.Http.AutoRestExt
                 handler.ServerCertificateCustomValidationCallback =
                     (httpRequestMessage, cert, cetChain, policyErrors) => true;
             }
-            _httpClient = new RandomUrlHttpClient(
-                new HttpClient(handler, true),
-                baseUrls,
-                timeout ?? TimeSpan.FromMilliseconds(1000),
-                retryCount);
+            return handler;
         }
 
         public async Task<ExecuteResult> ExecuteAsync(
@@ -77,9 +92,12 @@ namespace Agoda.Frameworks.Http.AutoRestExt
         {
             var response = GetResponse(res);
             var body = response != null
-                ? await res.Result.Content.ReadAsStringAsync()
+                ? await response.Content.ReadAsStringAsync()
                 : "";
             var isScala = GetIsScala(response);
+            var exceptions = (prevResults.LastOrDefault()?.Exceptions ?? new RouteException[0])
+                .Concat(GetExceptionList(res))
+                .ToList();
             return new ExecuteResult(
                 body,
                 (int)res.Elapsed.TotalMilliseconds,
@@ -92,7 +110,7 @@ namespace Agoda.Frameworks.Http.AutoRestExt
                 !res.IsError,
                 // Duplicate current list
                 prevResults,
-                GetExceptionList(res));
+                exceptions);
         }
 
         private static IReadOnlyList<RouteException> GetExceptionList(
