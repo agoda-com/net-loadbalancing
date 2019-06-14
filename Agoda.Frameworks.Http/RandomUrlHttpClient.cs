@@ -57,7 +57,9 @@ namespace Agoda.Frameworks.Http
 
         private static ShouldRetryPredicate GetRetryCountPredicate(int maxRetry) => (attemptCount, e) =>
         {
-            if (e is TimeoutException || e is TransientHttpRequestException)
+            if (e is TimeoutException ||
+                e is TransientHttpRequestException ||
+                e is ServiceUnavailableException)
             {
                 return attemptCount < maxRetry;
             }
@@ -161,6 +163,10 @@ namespace Agoda.Frameworks.Http
                                 res);
                         }
                         return res;
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        throw new ServiceUnavailableException(url, combinedUrl, e.Message, e);
                     }
                     catch (TaskCanceledException e)
                         when (!cts.Token.IsCancellationRequested)

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -89,6 +90,28 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
             Assert.ThrowsAsync<TransientHttpRequestException>(
                 () => client.PostAsync("api/55", new StringContent("55")));
             Assert.AreEqual(3, counter);
+        }
+
+        [Test]
+        public async Task TestHttpRequestException()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+
+            mockHttp.When(HttpMethod.Post, "http://test/*")
+                .Throw(new HttpRequestException());
+            var httpclient = mockHttp.ToHttpClient();
+
+            var client = new RandomUrlHttpClient(
+                httpclient,
+                new[] { "http://test/1", "http://test/2" },
+                null,
+                3,
+                null);
+
+            var result = await client.SendAsyncWithDiag("api/55", url => new HttpRequestMessage(HttpMethod.Post, url));
+
+            Assert.IsAssignableFrom<ServiceUnavailableException>(result.Last().Exception);
+            Assert.AreEqual(3, result.Count);
         }
     }
 }
