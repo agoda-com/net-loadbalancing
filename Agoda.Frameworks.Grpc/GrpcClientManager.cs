@@ -7,7 +7,13 @@ using Grpc.Core;
 
 namespace Agoda.Frameworks.Grpc
 {
-    public class GrpcClientManager<TClient> where TClient : ClientBase<TClient>
+    public interface IGrpcClientManager<TClient> where TClient : ClientBase<TClient>
+    {
+        TClient GetClient();
+        void UpdateResources(IReadOnlyDictionary<string, WeightItem> resources);
+    }
+
+    public class GrpcClientManager<TClient> : IGrpcClientManager<TClient> where TClient : ClientBase<TClient>
     {
         public IResourceManager<GrpcResource<TClient>> ResourceManager { get; }
         private readonly ProxyGenerator _proxyGenerator = new ProxyGenerator();
