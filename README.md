@@ -36,6 +36,13 @@ dotnet add Agoda.Frameworks.Http
 dotnet add Agoda.Frameworks.DB
 ```
 
+### Grpc
+[![NuGet version](https://badge.fury.io/nu/Agoda.Frameworks.Grpc.svg)](https://badge.fury.io/nu/Agoda.Frameworks.Grpc)
+
+```
+dotnet add Agoda.Frameworks.Grpc
+```
+
 ### LoadBalancing Core
 [![NuGet version](https://badge.fury.io/nu/Agoda.Frameworks.LoadBalancing.svg)](https://badge.fury.io/nu/Agoda.Frameworks.LoadBalancing)
 
