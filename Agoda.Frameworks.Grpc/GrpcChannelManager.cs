@@ -31,6 +31,14 @@ namespace Agoda.Frameworks.Grpc
             IReadOnlyDictionary<string, WeightItem> resources,
             IWeightManipulationStrategy weightStrategy,
             TimeSpan timeout,
+            int maxRetry) : this(resources, weightStrategy, timeout, GetRetryCountPredicate(maxRetry))
+        {
+        }
+
+        public GrpcChannelManager(
+            IReadOnlyDictionary<string, WeightItem> resources,
+            IWeightManipulationStrategy weightStrategy,
+            TimeSpan timeout,
             ShouldRetryPredicate shouldRetry)
         {
             _shouldRetry = shouldRetry ?? throw new ArgumentNullException(nameof(shouldRetry));

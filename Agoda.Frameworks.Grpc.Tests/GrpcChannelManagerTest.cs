@@ -212,10 +212,10 @@ namespace Agoda.Frameworks.Grpc.Tests
                 var lbCallInvoker = channelManager.GetCallInvoker();
                 var client = new SampleApi.SampleApiClient(lbCallInvoker);
 
-                var result = client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" });
+                var result = client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }).ResponseAsync.Result;
 
                 Assert.AreEqual(2, attempt);
-                Assert.AreEqual("success!", result.ResponseAsync.Result.Payload);
+                Assert.AreEqual("success!", result.Payload);
             }
             finally
             {
