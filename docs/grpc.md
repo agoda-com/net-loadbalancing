@@ -74,13 +74,13 @@ var client = new SampleApi.SampleApiClient(lbCallInvoker);
 
 ### Updating resources
 
-Updating resources should be done by using `GrpcClientManager.UpdateResources`.
-If you already have the client, updating the GrpcClientManager will affect the client as well.
+Updating resources should be done by using `GrpcChannelManager.UpdateResources`.
+If you already have the client, updating the GrpcChannelManager will affect the client as well.
 ```c#
 var channelManager = new GrpcChannelManager(
     new string[] { "server1", "server2" },
     timeout: TimeSpan.FromMilliseconds(200));
-var lbCallInvoker = clientManager.GetCallInvoker();
+var lbCallInvoker = channelManager.GetCallInvoker();
 var client = new SampleApi.SampleApiClient(lbCallInvoker);
 
 client.SampleRpcMethod(...); // might call server1 or server2
@@ -91,7 +91,7 @@ client.SampleRpcMethod(...); // might call server1 or server3, but not server2
 
 ### Retry on failure
 The client supports automatic retry for `DeadlineExceeded`, `Unavailable` and `Unknown` [status code](https://github.com/grpc/grpc/blob/master/doc/statuscodes.md) by default.
-The number of retries can be set in the `GrpcClientManager` constructor.
+The number of retries can be set in the `GrpcChannelManager` constructor.
 
 ### RPC Timeout
 Note that `deadline` parameter in each gRPC call will be ignored and the timeout specified in `GrpcChannelManager` will be used instead.
