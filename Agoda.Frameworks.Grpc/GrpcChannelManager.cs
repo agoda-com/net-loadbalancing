@@ -2,40 +2,42 @@
 using System.Collections.Generic;
 using System.Linq;
 using Agoda.Frameworks.LoadBalancing;
-using Castle.DynamicProxy;
 using Grpc.Core;
 
 namespace Agoda.Frameworks.Grpc
 {
-    public interface IGrpcClientManager<TClient> where TClient : ClientBase<TClient>
+    public interface IGrpcChannelManager
     {
-        TClient GetClient();
+        CallInvoker GetCallInvoker();
         void UpdateResources(IReadOnlyDictionary<string, WeightItem> resources);
     }
 
-    public class GrpcClientManager<TClient> : IGrpcClientManager<TClient> where TClient : ClientBase<TClient>
+    public class GrpcChannelManager : IGrpcChannelManager
     {
-        public IResourceManager<GrpcResource<TClient>> ResourceManager { get; }
-        private readonly ProxyGenerator _proxyGenerator = new ProxyGenerator();
+        public IResourceManager<GrpcResource> ResourceManager { get; }
         private readonly ShouldRetryPredicate _shouldRetry;
+        private readonly TimeSpan? _timeout;
 
-        public GrpcClientManager(string[] urls, int maxRetry = 1)
+        public GrpcChannelManager(string[] urls, TimeSpan? timeout, int maxRetry = 1)
         {
             _shouldRetry = GetRetryCountPredicate(maxRetry);
+            _timeout = timeout;
 
             var resourceDict = CreateResourceDictionary(urls.ToDictionary(x => x, x => WeightItem.CreateDefaultItem()));
-            ResourceManager = new ResourceManager<GrpcResource<TClient>>(resourceDict, new AgodaWeightManipulationStrategy());
+            ResourceManager = new ResourceManager<GrpcResource>(resourceDict, new AgodaWeightManipulationStrategy());
         }
 
-        public GrpcClientManager(
+        public GrpcChannelManager(
             IReadOnlyDictionary<string, WeightItem> resources,
             IWeightManipulationStrategy weightStrategy,
+            TimeSpan timeout,
             ShouldRetryPredicate shouldRetry)
         {
             _shouldRetry = shouldRetry ?? throw new ArgumentNullException(nameof(shouldRetry));
+            _timeout = timeout;
 
             var resourceDict = CreateResourceDictionary(resources);
-            ResourceManager = new ResourceManager<GrpcResource<TClient>>(resourceDict, weightStrategy);
+            ResourceManager = new ResourceManager<GrpcResource>(resourceDict, weightStrategy);
         }
 
         public void UpdateResources(string[] urls)
@@ -50,27 +52,25 @@ namespace Agoda.Frameworks.Grpc
             ResourceManager.UpdateResources(resourceDict);
         }
 
-        public TClient GetClient()
+        public CallInvoker GetCallInvoker()
         {
-            var lbInterceptor = new LoadBalancingInterceptor<TClient>(ResourceManager, _shouldRetry);
-            var proxiedClient = _proxyGenerator.CreateClassProxy(typeof(TClient), lbInterceptor);
-            return proxiedClient as TClient;
+            return new LoadBalancingCallInvoker(ResourceManager, _timeout, _shouldRetry);
         }
 
-        private IReadOnlyDictionary<GrpcResource<TClient>, WeightItem> CreateResourceDictionary(IReadOnlyDictionary<string, WeightItem> resources)
+        private IReadOnlyDictionary<GrpcResource, WeightItem> CreateResourceDictionary(IReadOnlyDictionary<string, WeightItem> resources)
         {
-            var newResourceDict = new Dictionary<GrpcResource<TClient>, WeightItem>();
+            var newResourceDict = new Dictionary<GrpcResource, WeightItem>();
             var currentResourceDict = ResourceManager?.Resources;
             var urlClientDict = currentResourceDict?.Keys.ToDictionary(x => x.Url, x => x);
 
             foreach (var i in resources)
             {
                 var url = i.Key;
-                GrpcResource<TClient> lookupKey;
+                GrpcResource lookupKey;
 
                 if (urlClientDict == null || !urlClientDict.ContainsKey(url))
                 {
-                    lookupKey = new GrpcResource<TClient>(url, CreateClient(url));
+                    lookupKey = new GrpcResource(url, new Channel(url, ChannelCredentials.Insecure));
                 }
                 else
                 {
@@ -82,21 +82,15 @@ namespace Agoda.Frameworks.Grpc
             return newResourceDict;
         }
 
-        private TClient CreateClient(string url)
-        {
-            var channel = new Channel(url, ChannelCredentials.Insecure);
-            var ctor = typeof(TClient).GetConstructor(new[] { typeof(Channel) });
-            return ctor.Invoke(new[] { channel }) as TClient;
-        }
-
         private static ShouldRetryPredicate GetRetryCountPredicate(int maxRetry) => (attemptCount, e) =>
         {
-            if (e.InnerException is RpcException)
+            if (e is RpcException)
             {
-                var statusCode = (e.InnerException as RpcException).StatusCode;
+                var statusCode = (e as RpcException).StatusCode;
 
                 if (statusCode == StatusCode.Unknown ||
-                    statusCode == StatusCode.Unavailable)
+                    statusCode == StatusCode.Unavailable ||
+                    statusCode == StatusCode.DeadlineExceeded)
                 {
                     return attemptCount < maxRetry;
                 }

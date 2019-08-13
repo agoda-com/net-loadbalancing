@@ -5,21 +5,21 @@ using Grpc.Core;
 
 namespace Agoda.Frameworks.Grpc
 {
-    public class GrpcResource<TClient> where TClient : ClientBase<TClient>
+    public class GrpcResource
     {
         public string Url { get; }
 
-        public TClient Client { get; }
+        public Channel Channel { get; }
 
-        public GrpcResource(string url, TClient client)
+        public GrpcResource(string url, Channel channel)
         {
             Url = url;
-            Client = client;
+            Channel = channel;
         }
 
-        public GrpcResource<TClient> WithClient(TClient client)
+        public GrpcResource WithChannel(Channel channel)
         {
-            return new GrpcResource<TClient>(Url, client);
+            return new GrpcResource(Url, channel);
         }
 
         public override int GetHashCode()
@@ -29,9 +29,9 @@ namespace Agoda.Frameworks.Grpc
 
         public override bool Equals(object obj)
         {
-            if (obj is GrpcResource<TClient>)
+            if (obj is GrpcResource)
             {
-                return Url == (obj as GrpcResource<TClient>).Url;
+                return Url == (obj as GrpcResource).Url;
             }
             else
             {
