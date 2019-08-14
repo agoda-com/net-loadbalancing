@@ -185,7 +185,7 @@ namespace Agoda.Frameworks.Grpc.Tests
         }
 
         [Test]
-        public void TestSuccessOnRetryAsync()
+        public async Task TestSuccessOnRetryAsync()
         {
             var attempt = 0;
             var server = SampleApiMock.CreateLocalServer(() =>
@@ -213,7 +213,7 @@ namespace Agoda.Frameworks.Grpc.Tests
                 var lbCallInvoker = channelManager.GetCallInvoker();
                 var client = new SampleApi.SampleApiClient(lbCallInvoker);
 
-                var result = client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }).ResponseAsync.Result;
+                var result = await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }).ResponseAsync;
 
                 Assert.AreEqual(2, attempt);
                 Assert.AreEqual("success!", result.Payload);

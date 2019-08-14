@@ -95,9 +95,9 @@ namespace Agoda.Frameworks.Grpc
 
         private static ShouldRetryPredicate GetRetryCountPredicate(int maxRetry) => (attemptCount, e) =>
         {
-            if (e is RpcException)
+            if (e is RpcException rpcEx)
             {
-                var statusCode = (e as RpcException).StatusCode;
+                var statusCode = rpcEx.StatusCode;
 
                 if (statusCode == StatusCode.Unknown ||
                     statusCode == StatusCode.Unavailable ||
