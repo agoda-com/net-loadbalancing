@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Agoda.Frameworks.LoadBalancing;
 using Grpc.Core;
 
@@ -11,15 +9,18 @@ namespace Agoda.Frameworks.Grpc
         private readonly IResourceManager<GrpcResource> _resourceManager;
         private readonly TimeSpan? _timeout;
         private readonly ShouldRetryPredicate _shouldRetry;
+        private readonly OnError _onError;
 
         public LoadBalancingCallInvoker(
             IResourceManager<GrpcResource> resourceManager,
             TimeSpan? timeout,
-            ShouldRetryPredicate shouldRetry)
+            ShouldRetryPredicate shouldRetry,
+            OnError onError)
         {
             _resourceManager = resourceManager;
             _timeout = timeout;
             _shouldRetry = shouldRetry;
+            _onError = onError;
         }
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace Agoda.Frameworks.Grpc
                 var overriddenOptions = OverrideCallOptions(options);
                 var call = new CallInvocationDetails<TRequest, TResponse>(grpcResource.Channel, method, host, overriddenOptions);
                 return Calls.BlockingUnaryCall(call, request);
-            }, _shouldRetry);
+            }, _shouldRetry, _onError);
         }
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace Agoda.Frameworks.Grpc
                 await asyncCall.ResponseAsync.ConfigureAwait(false);
 
                 return asyncCall;
-            }, _shouldRetry);
+            }, _shouldRetry, _onError);
 
             return callTask.Result;
         }

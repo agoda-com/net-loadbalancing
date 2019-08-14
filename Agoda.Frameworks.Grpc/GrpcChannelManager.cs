@@ -10,11 +10,14 @@ namespace Agoda.Frameworks.Grpc
     {
         CallInvoker GetCallInvoker();
         void UpdateResources(IReadOnlyDictionary<string, WeightItem> resources);
+        event EventHandler<GrpcErrorEventArgs> OnError;
     }
 
     public class GrpcChannelManager : IGrpcChannelManager
     {
         public IResourceManager<GrpcResource> ResourceManager { get; }
+        public event EventHandler<GrpcErrorEventArgs> OnError;
+
         private readonly ShouldRetryPredicate _shouldRetry;
         private readonly TimeSpan? _timeout;
 
@@ -62,7 +65,7 @@ namespace Agoda.Frameworks.Grpc
 
         public CallInvoker GetCallInvoker()
         {
-            return new LoadBalancingCallInvoker(ResourceManager, _timeout, _shouldRetry);
+            return new LoadBalancingCallInvoker(ResourceManager, _timeout, _shouldRetry, RaiseOnError);
         }
 
         private IReadOnlyDictionary<GrpcResource, WeightItem> CreateResourceDictionary(IReadOnlyDictionary<string, WeightItem> resources)
@@ -105,5 +108,8 @@ namespace Agoda.Frameworks.Grpc
             }
             return false;
         };
+
+        protected virtual void RaiseOnError(Exception error, int attemptCount) =>
+            OnError?.Invoke(this, new GrpcErrorEventArgs(error, attemptCount));
     }
 }

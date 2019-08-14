@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Agoda.Frameworks.Grpc.Tests.Proto;
@@ -315,6 +316,46 @@ namespace Agoda.Frameworks.Grpc.Tests
             {
                 server.ShutdownAsync().Wait();
             }   
+        }
+
+        [Test]
+        public void TestOnError()
+        {
+            var channelManager = new GrpcChannelManager(new string[] { "randomhost" }, TimeSpan.FromMilliseconds(10), maxRetry: 3);
+            var callInvoker = channelManager.GetCallInvoker();
+            var client = new SampleApi.SampleApiClient(callInvoker);
+
+            var attemptList = new List<int>();
+            var errorList = new List<Exception>();
+            channelManager.OnError += (obj, args) =>
+            {
+                attemptList.Add(args.AttemptCount);
+                errorList.Add(args.Error);
+            };
+
+            Assert.Throws<RpcException>(() => client.SampleRpcMethod(new SampleRequest() { Payload = "" }));
+            Assert.AreEqual(attemptList, new List<int>() { 1, 2, 3 });
+            Assert.IsTrue(errorList.All(e => e is RpcException));
+        }
+
+        [Test]
+        public void TestOnErrorAsync()
+        {
+            var channelManager = new GrpcChannelManager(new string[] { "randomhost" }, TimeSpan.FromMilliseconds(10), maxRetry: 3);
+            var callInvoker = channelManager.GetCallInvoker();
+            var client = new SampleApi.SampleApiClient(callInvoker);
+
+            var attemptList = new List<int>();
+            var errorList = new List<Exception>();
+            channelManager.OnError += (obj, args) =>
+            {
+                attemptList.Add(args.AttemptCount);
+                errorList.Add(args.Error);
+            };
+
+            Assert.ThrowsAsync<AggregateException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
+            Assert.AreEqual(attemptList, new List<int>() { 1, 2, 3 });
+            Assert.IsTrue(errorList.All(e => e is RpcException));
         }
 
     }
