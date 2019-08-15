@@ -354,6 +354,7 @@ namespace Agoda.Frameworks.Grpc.Tests
 
             Assert.ThrowsAsync<RpcException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
             Assert.AreEqual(attemptList, new List<int>() { 1, 2, 3 });
+            Assert.IsTrue(errorList.All(e => e is RpcException));
         }
 
     }
