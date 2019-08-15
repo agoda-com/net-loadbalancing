@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Agoda.Frameworks.Grpc.Tests.Proto";
+
+service SampleApi {
+    rpc SampleRpcMethod (SampleRequest) returns (SampleResponse);
+}
+
+message SampleRequest {
+    string payload = 1;
+}
+
+message SampleResponse {
+    string payload = 1;
+}

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
+    <Authors>Agoda</Authors>
+    <Product>Agoda.Frameworks.Grpc</Product>
+    <Company>Agoda</Company>
+    <Description>Agoda.Frameworks.Grpc</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
+    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+	<PackageReference Include="Grpc.Core" Version="1.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Agoda.Frameworks.LoadBalancing\Agoda.Frameworks.LoadBalancing.csproj" />
+  </ItemGroup>
+</Project>
