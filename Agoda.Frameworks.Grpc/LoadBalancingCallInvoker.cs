@@ -57,7 +57,7 @@ namespace Agoda.Frameworks.Grpc
                 return Tuple.Create(response, headers, status, trailers);
             }, _shouldRetry, _onError);
 
-            return new AsyncUnaryCallWrapper<TResponse>(result).AsyncUnaryCall;
+            return new AsyncUnaryCallWrapper<TResponse>(result).GetAsyncUnaryCall();
         }
 
         /// <summary>

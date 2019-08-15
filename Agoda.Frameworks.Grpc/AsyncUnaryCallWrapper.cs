@@ -19,18 +19,15 @@ namespace Agoda.Frameworks.Grpc
             _result = result;
         }
 
-        public AsyncUnaryCall<TResponse> AsyncUnaryCall
+        public AsyncUnaryCall<TResponse> GetAsyncUnaryCall()
         {
-            get
-            {
-                return new AsyncUnaryCall<TResponse>(
-                    GetResponseAsync(),
-                    GetResponseHeadersAsync(),
-                    GetStatus,
-                    GetTrailers,
-                    Cancel
-                );
-            }
+            return new AsyncUnaryCall<TResponse>(
+                GetResponseAsync(),
+                GetResponseHeadersAsync(),
+                GetStatus,
+                GetTrailers,
+                Cancel
+            );
         }
 
         private async Task<TResponse> GetResponseAsync()
