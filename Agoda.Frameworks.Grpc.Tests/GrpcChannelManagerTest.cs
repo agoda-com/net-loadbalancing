@@ -135,7 +135,7 @@ namespace Agoda.Frameworks.Grpc.Tests
                 var lbCallInvoker = channelManager.GetCallInvoker();
                 var client = new SampleApi.SampleApiClient(lbCallInvoker);
 
-                Assert.ThrowsAsync<AggregateException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
+                Assert.ThrowsAsync<RpcException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
                 Assert.AreEqual(3, attempt);
             }
             finally
@@ -279,9 +279,8 @@ namespace Agoda.Frameworks.Grpc.Tests
                 var lbCallInvoker = channelManager.GetCallInvoker();
                 var client = new SampleApi.SampleApiClient(lbCallInvoker);
 
-                var e = Assert.ThrowsAsync<AggregateException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
-                Assert.IsTrue(e.InnerException is RpcException);
-                Assert.AreEqual((e.InnerException as RpcException).StatusCode, StatusCode.DeadlineExceeded);
+                var e = Assert.ThrowsAsync<RpcException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
+                Assert.AreEqual(e.StatusCode, StatusCode.DeadlineExceeded);
                 Assert.AreEqual(3, attempt);
             }
             finally
@@ -353,9 +352,8 @@ namespace Agoda.Frameworks.Grpc.Tests
                 errorList.Add(args.Error);
             };
 
-            Assert.ThrowsAsync<AggregateException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
+            Assert.ThrowsAsync<RpcException>(async () => await client.SampleRpcMethodAsync(new SampleRequest() { Payload = "" }));
             Assert.AreEqual(attemptList, new List<int>() { 1, 2, 3 });
-            Assert.IsTrue(errorList.All(e => e is RpcException));
         }
 
     }

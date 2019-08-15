@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Agoda.Frameworks.LoadBalancing;
 using Grpc.Core;
 
@@ -41,18 +42,22 @@ namespace Agoda.Frameworks.Grpc
         /// </summary>
         public override AsyncUnaryCall<TResponse> AsyncUnaryCall<TRequest, TResponse>(Method<TRequest, TResponse> method, string host, CallOptions options, TRequest request)
         {
-            var callTask = _resourceManager.ExecuteAsync(async (grpcResource, retryCount) =>
+            var result = _resourceManager.ExecuteAsync(async (grpcResource, retryCount) =>
             {
                 var overriddenOptions = OverrideCallOptions(options);
                 var call = new CallInvocationDetails<TRequest, TResponse>(grpcResource.Channel, method, host, overriddenOptions);
                 var asyncCall = Calls.AsyncUnaryCall(call, request);
                 
-                await asyncCall.ResponseAsync.ConfigureAwait(false);
+                // Await for any exception, but return the original object because we don't want to lose any information
+                var response = await asyncCall.ResponseAsync.ConfigureAwait(false);
+                var headers = await asyncCall.ResponseHeadersAsync.ConfigureAwait(false);
+                var status = asyncCall.GetStatus();
+                var trailers = asyncCall.GetTrailers();
 
-                return asyncCall;
+                return Tuple.Create(response, headers, status, trailers);
             }, _shouldRetry, _onError);
 
-            return callTask.Result;
+            return new AsyncUnaryCallWrapper<TResponse>(result).AsyncUnaryCall;
         }
 
         /// <summary>
