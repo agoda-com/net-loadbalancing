@@ -36,6 +36,7 @@ $deployables = @{
     "Http" = "Agoda.Frameworks.Http"
     "Http.AutoRestExt" = "Agoda.Frameworks.Http.AutoRestExt"
     "LoadBalancing" = "Agoda.Frameworks.LoadBalancing"
+    "Grpc" = "Agoda.Frameworks.Grpc"
 }
 
 function Configure_Meta($meta, $include, $v) {
