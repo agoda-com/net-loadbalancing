@@ -20,6 +20,16 @@ namespace Agoda.Frameworks.LoadBalancing
         event EventHandler<UpdateWeightEventArgs> OnAllSourcesReachBottom;
     }
 
+    public static class ResourceManager
+    {
+        public static IResourceManager<TSource> Create<TSource>(IEnumerable<TSource> sources) =>
+            new ResourceManager<TSource>(
+                sources.ToDictionary(
+                    x => x,
+                    _ => WeightItem.CreateDefaultItem()),
+                new AgodaWeightManipulationStrategy());
+    }
+
     public class ResourceManager<TSource> : IResourceManager<TSource>
     {
         private readonly ThreadLocal<Random> _random = new ThreadLocal<Random>(() => new Random());

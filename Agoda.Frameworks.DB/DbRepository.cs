@@ -113,6 +113,12 @@ namespace Agoda.Frameworks.DB
         {
         }
 
+        public DbRepository(
+            IDbResourceManager dbResources)
+            : this(dbResources, new DummyCache(), connStr => new SqlConnection(connStr))
+        {
+        }
+
         // TODO: Handle SqlException
         protected virtual ShouldRetryPredicate ShouldRetry(int maxAttemptCount)
             => (attemptcount, exception) => attemptcount < maxAttemptCount;
