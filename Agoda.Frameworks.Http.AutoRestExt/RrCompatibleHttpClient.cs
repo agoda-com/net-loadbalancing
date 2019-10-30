@@ -39,6 +39,11 @@ namespace Agoda.Frameworks.Http.AutoRestExt
         {
         }
 
+        public void UpdateBaseUrls(string[] baseUrls)
+        {
+            _httpClient.UpdateBaseUrls(baseUrls);
+        }
+
         private static HttpClientHandler CreateDefaultHandler(bool isGzip, bool ignoreSslPolicyErrors)
         {
             var handler = new HttpClientHandler();
