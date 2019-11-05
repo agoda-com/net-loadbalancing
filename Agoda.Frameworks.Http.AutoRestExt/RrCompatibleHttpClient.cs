@@ -71,7 +71,7 @@ namespace Agoda.Frameworks.Http.AutoRestExt
                 var msg = new HttpRequestMessage(verb, fullUrl);
                 if (content != null)
                 {
-                    msg.Content = new StringContent(content);
+                    msg.Content = new StringContent(content, Encoding.UTF8, "application/json");
                 }
                 if (headers != null)
                 {

@@ -37,6 +37,35 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
         }
 
         [Test]
+        public async Task TestExecuteAsyncPost()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+
+            mockHttp.When(HttpMethod.Post, "http://test/*")
+                .With(arg =>
+                {
+                    // Must provide content-type
+                    return arg.Content.Headers.ContentType.MediaType == "application/json";
+                })
+                .WithContent("{\"foo\":\"bar\"}")
+                .Respond(msg =>
+                {
+                    StringAssert.IsMatch("http://test/1|2/api/55", msg.RequestUri.AbsoluteUri);
+                    return new StringContent("ok");
+                });
+
+            var client = new RrCompatibleHttpClient(
+                new[] { "http://test/1", "http://test/2" },
+                null,
+                3,
+                mockHttp);
+            var res = await client.ExecuteAsync(HttpMethod.Post, "api/55", "{\"foo\":\"bar\"}", null);
+            Assert.AreEqual("ok", res.Results);
+            Assert.IsTrue(res.IsOK);
+            Assert.IsFalse(res.IsScala);
+        }
+
+        [Test]
         public async Task TestIsScala()
         {
             var mockHttp = new MockHttpMessageHandler();
