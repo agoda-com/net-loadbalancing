@@ -68,7 +68,9 @@ namespace Agoda.Frameworks.Http
 
         public void UpdateBaseUrls(string[] baseUrls)
         {
-            var dict = baseUrls.ToDictionary(x => x, x => WeightItem.CreateDefaultItem());
+            var dict = baseUrls
+                .Distinct()
+                .ToDictionary(x => x, _ => WeightItem.CreateDefaultItem());
             UrlResourceManager.UpdateResources(dict);
         }
 

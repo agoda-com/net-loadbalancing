@@ -113,5 +113,15 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
             Assert.IsAssignableFrom<ServiceUnavailableException>(result.Last().Exception);
             Assert.AreEqual(3, result.Count);
         }
+
+        [Test]
+        public void UpdateBaseUrls()
+        {
+            var client = new RandomUrlHttpClient(new[] { "http://test/1", "http://test/2" });
+
+            // Should not throw due to identical items in the list (Distinct before ToDictionary)
+            client.UpdateBaseUrls(new[] { "http://test/3", "http://test/3" });
+            Assert.AreEqual("http://test/3", client.UrlResourceManager.SelectRandomly());
+        }
     }
 }
