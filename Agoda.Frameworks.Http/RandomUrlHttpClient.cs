@@ -76,7 +76,9 @@ namespace Agoda.Frameworks.Http
 
         private static IResourceManager<string> CreateResourceManager(string[] baseUrls)
         {
-            var dict = baseUrls.ToDictionary(x => x, x => WeightItem.CreateDefaultItem());
+            var dict = baseUrls
+                .Distinct()
+                .ToDictionary(x => x, x => WeightItem.CreateDefaultItem());
             var mgr = new ResourceManager<string>(dict, new AgodaWeightManipulationStrategy());
             return mgr;
         }

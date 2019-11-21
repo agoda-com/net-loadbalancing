@@ -11,6 +11,15 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
     public class RandomUrlHttpClientTest
     {
         [Test]
+        public void CtorDuplicatedUrl()
+        {
+            var client = new RandomUrlHttpClient(
+                new[] { "http://test/1", "http://test/1" });
+            Assert.AreEqual(1, client.UrlResourceManager.Resources.Count);
+            Assert.AreEqual("http://test/1", client.UrlResourceManager.Resources.Keys.First());
+        }
+
+        [Test]
         public async Task TestGetAsync()
         {
             var mockHttp = new MockHttpMessageHandler();
