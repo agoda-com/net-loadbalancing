@@ -75,6 +75,41 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
         }
 
         [Test]
+        public async Task TestPostJsonAsync()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+
+            mockHttp.When(HttpMethod.Post, "http://test/*")
+                .With(arg =>
+                {
+                    // Must provide content-type
+                    return arg.Content.Headers.ContentType.MediaType == "application/json";
+                })
+                .Respond(async (msg) =>
+                {
+                    Assert.AreEqual("{\"foo\":\"bar\"}", await msg.Content.ReadAsStringAsync());
+                    StringAssert.IsMatch("http://test/1|2/api/55", msg.RequestUri.AbsoluteUri);
+                    var resmsg = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("ok")
+                    };
+                    return resmsg;
+                });
+            var httpclient = mockHttp.ToHttpClient();
+
+            var client = new RandomUrlHttpClient(
+                httpclient,
+                new[] { "http://test/1", "http://test/2" },
+                null,
+                3,
+                null);
+            var res = await client.PostJsonAsync("api/55", "{\"foo\":\"bar\"}");
+            var content = await res.Content.ReadAsStringAsync();
+
+            Assert.AreEqual("ok", content);
+        }
+
+        [Test]
         public void TestRetry()
         {
             var mockHttp = new MockHttpMessageHandler();

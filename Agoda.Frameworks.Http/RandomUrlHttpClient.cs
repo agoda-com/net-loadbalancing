@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Agoda.Frameworks.LoadBalancing;
@@ -91,14 +92,21 @@ namespace Agoda.Frameworks.Http
             }
         }
 
-        public Task<HttpResponseMessage> PostAsync(string url, HttpContent content) =>
-            SendAsync(url, uri => HttpClient.PostAsync(uri, content));
-
         public Task<HttpResponseMessage> GetAsync(string url) =>
             SendAsync(url, uri => HttpClient.GetAsync(uri));
 
+#if !NET462
+        public Task<HttpResponseMessage> PostAsync(string url, HttpContent content) =>
+            SendAsync(url, uri => HttpClient.PostAsync(uri, content));
+
         public Task<HttpResponseMessage> PutAsync(string url, HttpContent content) =>
             SendAsync(url, uri => HttpClient.PutAsync(uri, content));
+#endif
+        public Task<HttpResponseMessage> PostJsonAsync(string url, string json) =>
+            SendAsync(url, uri => HttpClient.PostAsync(uri, new StringContent(json, Encoding.UTF8, "application/json")));
+
+        public Task<HttpResponseMessage> PutJsonAsync(string url, string json) =>
+            SendAsync(url, uri => HttpClient.PutAsync(uri, new StringContent(json, Encoding.UTF8, "application/json")));
 
         public Task<HttpResponseMessage> DeleteAsync(string url) =>
             SendAsync(url, uri => HttpClient.DeleteAsync(uri));
