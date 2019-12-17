@@ -111,6 +111,15 @@ namespace Agoda.Frameworks.Http
         public Task<HttpResponseMessage> DeleteAsync(string url) =>
             SendAsync(url, uri => HttpClient.DeleteAsync(uri));
 
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return await SendAsync(request.RequestUri.PathAndQuery, (url) =>
+            {
+                request.RequestUri = new Uri(url);
+                return HttpClient.SendAsync(request, cancellationToken);
+            });
+        }
+
         public Task<HttpResponseMessage> SendAsync(
             string url,
             Func<string, HttpRequestMessage> requestMsg) =>
@@ -155,7 +164,7 @@ namespace Agoda.Frameworks.Http
                         {
                             throw new TransientHttpRequestException(
                                 url,
-                                combinedUrl, 
+                                combinedUrl,
                                 res,
                                 $"Response status code does not indicate success: ${res.StatusCode}");
                         }
