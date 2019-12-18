@@ -57,12 +57,11 @@ namespace Agoda.Frameworks.Http.AutoRestExt
         {
             if (Exceptions.Count <= 0) return null;
 
-            var sb = new StringBuilder("Exceptions: ");
+            var sb = new StringBuilder("There are some exceptons occurred");
             foreach (var ex in Exceptions)
             {
-                sb.Append(string.Format("\r\n - \"{0}\" -> {1}", ex.Message, ex.Uri));
-            }
-            
+                sb.Append(string.Format("\r\n - \"{0}\" -> {1}", ex.Uri, ex.Message));
+            }       
             return new Exception(sb.ToString());
         }
     }
