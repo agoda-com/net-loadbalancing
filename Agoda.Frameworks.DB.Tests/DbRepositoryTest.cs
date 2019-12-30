@@ -7,7 +7,7 @@ using Moq;
 using Moq.Dapper;
 using NUnit.Framework;
 
-namespace Agoda.Frameworks.DB.Test
+namespace Agoda.Frameworks.DB.Tests
 {
     public class DbRepositoryTest
     {

@@ -126,5 +126,25 @@ namespace Agoda.Frameworks.LoadBalancing.Test
             // remove
             Assert.IsFalse(mgr.Resources.ContainsKey("remove"));
         }
+
+        [Test]
+        public void UpdateResources_AgodaWeight()
+        {
+            var mgr = ResourceManager.Create(new[] { "remove", "keep", "keep_unchanged" });
+            // Change weight
+            mgr.UpdateWeight("keep", false);
+
+            mgr.UpdateResources(new[] { "keep", "keep_unchanged", "add" });
+
+            // add
+            Assert.IsTrue(WeightItem.CreateDefaultItem().Equals(mgr.Resources["add"]));
+            // keep
+            Assert.AreEqual(WeightItem.CreateDefaultItem().MaxWeight, mgr.Resources["keep"].MaxWeight);
+            Assert.AreNotEqual(WeightItem.CreateDefaultItem().Weight, mgr.Resources["keep"].Weight);
+            // keep_unchanged
+            Assert.IsTrue(WeightItem.CreateDefaultItem().Equals(mgr.Resources["keep_unchanged"]));
+            // remove
+            Assert.IsFalse(mgr.Resources.ContainsKey("remove"));
+        }
     }
 }

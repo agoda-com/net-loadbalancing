@@ -38,4 +38,54 @@ namespace Agoda.Frameworks.DB
             throw new NotSupportedException("Unsupported database type.");
         }
     }
+
+    public static class DbResourceManagerExtension
+    {
+        public static void UpdateResources(
+            this IDbResourceManager mgr,
+            string dbName,
+            IEnumerable<string> dataSources)
+        {
+            if (mgr.AllResources.TryGetValue(dbName, out var resource))
+            {
+                resource.UpdateResources(dataSources);
+            }
+            else
+            {
+                throw new ArgumentException($"Database {dbName} not found.", nameof(dbName));
+            }
+        }
+
+        public static void AddResources(
+            this IDbResourceManager mgr,
+            string dbName,
+            IEnumerable<string> dataSources)
+        {
+            if (mgr.AllResources.TryGetValue(dbName, out var resource))
+            {
+                resource.UpdateResources(
+                    resource.Resources.Keys.Union(dataSources));
+            }
+            else
+            {
+                throw new ArgumentException($"Database {dbName} not found.", nameof(dbName));
+            }
+        }
+
+        public static void RemoveResources(
+            this IDbResourceManager mgr,
+            string dbName,
+            IEnumerable<string> dataSources)
+        {
+            if (mgr.AllResources.TryGetValue(dbName, out var resource))
+            {
+                resource.UpdateResources(
+                    resource.Resources.Keys.Except(dataSources));
+            }
+            else
+            {
+                throw new ArgumentException($"Database {dbName} not found.", nameof(dbName));
+            }
+        }
+    }
 }

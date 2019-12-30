@@ -152,6 +152,16 @@ namespace Agoda.Frameworks.LoadBalancing
 
     public static class ResourceManagerExtension
     {
+        public static void UpdateResources<TSource>(
+            this IResourceManager<TSource> mgr,
+            IEnumerable<TSource> collection)
+        {
+            mgr.UpdateResources(
+                collection
+                .Distinct()
+                .ToDictionary(x => x, _ => WeightItem.CreateDefaultItem()));
+        }
+
         // TODO: Test
         public static TResult ExecuteAction<TSource, TResult>(
             this IResourceManager<TSource> mgr,
