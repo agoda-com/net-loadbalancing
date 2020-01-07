@@ -95,9 +95,10 @@ namespace Agoda.Frameworks.LoadBalancing
                 if (!newWeight.Equals(weight))
                 {
                     // Only update collection when new weight is different.
-                    var newCollection = oldCollection.SetItem(source, newWeight);
+                    ImmutableDictionary<TSource, WeightItem> newCollection;
                     lock (_collection)
                     {
+                        newCollection = _collection.SetItem(source, newWeight);
                         if (_collection.ContainsKey(source))
                         {
                             // Only update collection when it still contains
