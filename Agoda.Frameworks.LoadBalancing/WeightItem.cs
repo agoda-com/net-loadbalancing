@@ -2,7 +2,7 @@
 
 namespace Agoda.Frameworks.LoadBalancing
 {
-    public sealed class WeightItem
+    public struct WeightItem
     {
         public WeightItem(int weight, int maxWeight)
             : this(weight, maxWeight, 1)
@@ -29,9 +29,9 @@ namespace Agoda.Frameworks.LoadBalancing
             MinWeight = minWeight;
         }
 
-        public int Weight { get; }
-        public int MinWeight { get; }
-        public int MaxWeight { get; }
+        public readonly int Weight;
+        public readonly int MinWeight;
+        public readonly int MaxWeight;
 
         public override bool Equals(object obj)
         {

@@ -16,8 +16,8 @@ namespace Agoda.Frameworks.LoadBalancing
         void UpdateWeight(TSource source, bool isSuccess);
         void UpdateResources(IReadOnlyDictionary<TSource, WeightItem> newResources);
 
-        event EventHandler<UpdateWeightEventArgs> OnUpdateWeight;
-        event EventHandler<UpdateWeightEventArgs> OnAllSourcesReachBottom;
+        event EventHandler<UpdateWeightEventArgs<TSource>> OnUpdateWeight;
+        event EventHandler<UpdateWeightEventArgs<TSource>> OnAllSourcesReachBottom;
     }
 
     public static class ResourceManager
@@ -38,14 +38,14 @@ namespace Agoda.Frameworks.LoadBalancing
 
         public IReadOnlyDictionary<TSource, WeightItem> Resources => _collection;
 
-        public event EventHandler<UpdateWeightEventArgs> OnUpdateWeight;
-        public event EventHandler<UpdateWeightEventArgs> OnAllSourcesReachBottom;
+        public event EventHandler<UpdateWeightEventArgs<TSource>> OnUpdateWeight;
+        public event EventHandler<UpdateWeightEventArgs<TSource>> OnAllSourcesReachBottom;
 
         private static void CheckCollectionArg(IReadOnlyDictionary<TSource, WeightItem> collection)
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("Source collection must not be null.", nameof(collection));
+                throw new ArgumentNullException(nameof(collection), "Source collection must not be null.");
             }
 
             if (collection.Count == 0)
@@ -85,28 +85,29 @@ namespace Agoda.Frameworks.LoadBalancing
 
         public void UpdateWeight(TSource source, bool isSuccess)
         {
-            ImmutableDictionary<TSource, WeightItem> oldCollection;
-            ImmutableDictionary<TSource, WeightItem> newCollection;
-            lock (_collection)
+            var oldCollection = _collection;
+            if (oldCollection.TryGetValue(source, out var weight))
             {
-                oldCollection = _collection;
-                if (oldCollection.TryGetValue(source, out var weight))
+                var newWeight = _weightManipulationStrategy.UpdateWeight(
+                    source,
+                    weight,
+                    isSuccess);
+                if (!newWeight.Equals(weight))
                 {
-                    newCollection = oldCollection.SetItem(
-                        source,
-                        _weightManipulationStrategy.UpdateWeight(
-                            source,
-                            weight,
-                            isSuccess));
-                    _collection = newCollection;
-                }
-                else
-                {
-                    newCollection = oldCollection;
+                    // Only update collection when new weight is different.
+                    var newCollection = oldCollection.SetItem(source, newWeight);
+                    lock (_collection)
+                    {
+                        if (_collection.ContainsKey(source))
+                        {
+                            // Only update collection when it still contains
+                            // the key we're updating.
+                            _collection = newCollection;
+                        }
+                    }
+                    RaiseWeightUpdateEvent(oldCollection, newCollection);
                 }
             }
-
-            RaiseWeightUpdateEvent(oldCollection, newCollection);
         }
 
         public void UpdateResources(IReadOnlyDictionary<TSource, WeightItem> collection)
@@ -115,6 +116,7 @@ namespace Agoda.Frameworks.LoadBalancing
 
             ImmutableDictionary<TSource, WeightItem> oldCollection;
             ImmutableDictionary<TSource, WeightItem> newCollection;
+            var isDifferent = false;
             lock (_collection)
             {
                 oldCollection = _collection;
@@ -124,30 +126,46 @@ namespace Agoda.Frameworks.LoadBalancing
                         x => oldCollection.TryGetValue(x.Key, out var weight)
                             ? weight
                             : x.Value);
-                _collection = newCollection;
+                isDifferent = !(
+                    oldCollection.Keys.Count() == newCollection.Keys.Count() &&
+                    oldCollection.Keys.All(x =>
+                        newCollection.ContainsKey(x) &&
+                        newCollection[x].Equals(oldCollection[x])));
+                if (isDifferent)
+                {
+                    _collection = newCollection;
+                }
             }
-            RaiseWeightUpdateEvent(oldCollection, newCollection);
+            if (isDifferent)
+            {
+                RaiseWeightUpdateEvent(oldCollection, newCollection);
+            }
         }
 
         private void RaiseWeightUpdateEvent(
             ImmutableDictionary<TSource, WeightItem> oldCollection,
             ImmutableDictionary<TSource, WeightItem> newCollection)
         {
-            if (oldCollection != newCollection)
+            RaiseOnUpdateWeight(oldCollection, newCollection);
+            if (newCollection.Values.All(x => x.Weight == x.MinWeight))
             {
-                RaiseOnUpdateWeight(newCollection.Values);
-                if (newCollection.Values.All(x => x.Weight == x.MinWeight))
-                {
-                    RaiseOnAllSourcesReachBottom(newCollection.Values);
-                }
+                RaiseOnAllSourcesReachBottom(oldCollection, newCollection);
             }
         }
 
-        protected virtual void RaiseOnUpdateWeight(IEnumerable<WeightItem> weights) =>
-            OnUpdateWeight?.Invoke(this, new UpdateWeightEventArgs(weights));
+        protected virtual void RaiseOnUpdateWeight(
+                IReadOnlyDictionary<TSource, WeightItem> oldCollection,
+                IReadOnlyDictionary<TSource, WeightItem> newCollection) =>
+            OnUpdateWeight?.Invoke(
+                this,
+                new UpdateWeightEventArgs<TSource>(oldCollection, newCollection));
 
-        protected virtual void RaiseOnAllSourcesReachBottom(IEnumerable<WeightItem> weights) =>
-            OnAllSourcesReachBottom?.Invoke(this, new UpdateWeightEventArgs(weights));
+        protected virtual void RaiseOnAllSourcesReachBottom(
+            IReadOnlyDictionary<TSource, WeightItem> oldCollection,
+                IReadOnlyDictionary<TSource, WeightItem> newCollection) =>
+            OnAllSourcesReachBottom?.Invoke(
+                this,
+                new UpdateWeightEventArgs<TSource>(oldCollection, newCollection));
     }
 
     public static class ResourceManagerExtension
