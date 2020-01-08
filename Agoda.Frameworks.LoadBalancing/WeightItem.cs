@@ -2,7 +2,7 @@
 
 namespace Agoda.Frameworks.LoadBalancing
 {
-    public struct WeightItem
+    public sealed class WeightItem
     {
         public WeightItem(int weight, int maxWeight)
             : this(weight, maxWeight, 1)
