@@ -42,6 +42,7 @@ namespace Agoda.Frameworks.DB.Tests
             };
             var key = parameters.CreateCacheKey("sp_foo");
 
+            throw new Exception(key);
             Assert.AreEqual(
                 "db.v1.sp_foo:" +
                 "@bool+True&" +
