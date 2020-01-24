@@ -22,7 +22,7 @@
     <PackageReference Include="Dapper" Version="2.0.30" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Agoda.Frameworks.LoadBalancing\Agoda.Frameworks.LoadBalancing.csproj" />
