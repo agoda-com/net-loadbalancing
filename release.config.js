@@ -39,24 +39,17 @@ module.exports = {
             "Agoda.Frameworks.Http.AutoRestExt",
             "Agoda.Frameworks.LoadBalancing"
         ].map(x => {
+            const extension = "*.nupkg";
             return {
                        path: "@semantic-release/exec",
-                       cmd: `cp ./${x}/bin/Release/*.nupkg ./out/`
+                       cmd: `cp ./${x}/bin/Release/${extension} ./out/`
                    }
-        }),
-        {
-            path: "@semantic-release/exec",
-            cmd: "echo nuget publish with source"
-        }
+        })
     ],
     publish: [
         {
             path: "@semantic-release/exec",
-            cmd: `docker push ${serviceName}:\${nextRelease.version}`
-        },
-        {
-            path: "@semantic-release/exec",
-            cmd: `docker push ${serviceName}:latest`
+            cmd: `echo publish to github or nuget`
         },
         "@semantic-release/github"
     ]
