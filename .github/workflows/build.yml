@@ -40,7 +40,7 @@ jobs:
   deploy:
     needs: build
     name: Deploy Packages
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Download Package artifact
         uses: actions/download-artifact@master
@@ -59,4 +59,4 @@ jobs:
           dotnet-version: 3.1.100
 
       - name: Push to NuGet
-        run: dotnet nuget push nupkg\*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://nuget.org --skip-duplicate
+        run: dotnet nuget push nupkg/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://nuget.org --skip-duplicate
