@@ -6,6 +6,7 @@
     <Product>Agoda.Frameworks.Http</Product>
     <Company>Agoda</Company>
     <Description>Agoda.Frameworks.Http</Description>
+    <VersionPrefix>7.0.82</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)'!='Windows_NT'">

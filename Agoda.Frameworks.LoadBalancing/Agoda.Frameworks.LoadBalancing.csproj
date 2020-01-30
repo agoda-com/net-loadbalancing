@@ -5,6 +5,7 @@
     <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
     <Company>Agoda</Company>
     <Description>Agoda.Frameworks.LoadBalancing</Description>
+    <VersionPrefix>7.0.82</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
