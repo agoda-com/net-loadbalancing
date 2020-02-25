@@ -58,3 +58,6 @@ dotnet build
 dotnet test
 ```
 
+## Contributors
+
+@cyberhck for adding support for GitHub actions and fixed unit tests under different locales
