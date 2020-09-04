@@ -3,7 +3,7 @@ name: .NET Core Build and Deploy
 on:
   push:
     branches:
-      - master
+      - '**'
 
 jobs:
   build:
