@@ -62,7 +62,7 @@ namespace Agoda.Frameworks.LoadBalancing
                 var item = _chooseRandomly();
                 try
                 {
-                    var result = await taskFunc(item, attemptCount);
+                    var result = await taskFunc(item, attemptCount).ConfigureAwait(false);
 
                     _updateWeight(item, true);
 
@@ -93,7 +93,7 @@ namespace Agoda.Frameworks.LoadBalancing
                 try
                 {
                     stopwatch.Restart();
-                    var result = await taskFunc(item, attemptCount);
+                    var result = await taskFunc(item, attemptCount).ConfigureAwait(false);
                     _updateWeight(item, true);
                     results.Add(new RetryActionResult<TSource, TResult>(
                         item, result, stopwatch.Elapsed, null, attemptCount));
