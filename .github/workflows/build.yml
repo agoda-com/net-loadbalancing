@@ -23,7 +23,7 @@ jobs:
 
     - name: Build
       run: dotnet build --configuration Release --no-restore
-      
+
     # Run the tests, ideally should stop here if a fail and also publish results as artifacts
     - name: Test
       run: dotnet test
