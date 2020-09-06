@@ -10,18 +10,15 @@ jobs:
   build:
     name: Build Package 
     runs-on: windows-latest # using windows agent for net462 build
-
+    strategy:
+      matrix:
+        dotnet: [ '2.1.405', '3.1.100' ]
     steps:
     - uses: actions/checkout@v1
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.100
-
-    - name: Setup .NET Core SDK 2.1
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 2.1.809
+        dotnet-version: ${{ matrix.dotnet }}
 
     - name: Restore
       run: dotnet restore
