@@ -10,15 +10,13 @@ jobs:
   build:
     name: Build Package 
     runs-on: windows-latest # using windows agent for net462 build
-    strategy:
-      matrix:
-        dotnet: [ '2.1.403', '3.1.100' ]
+
     steps:
     - uses: actions/checkout@v1
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ matrix.dotnet }}
+        dotnet-version: 3.1.100
 
     - name: Restore
       run: dotnet restore
@@ -26,6 +24,14 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
 
+    - name: Setup .NET Core SDK 2.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.1.403
+
+    - name: Restore 2.1
+      run: dotnet restore
+      
     # Run the tests, ideally should stop here if a fail and also publish results as artifacts
     - name: Test
       run: dotnet test
