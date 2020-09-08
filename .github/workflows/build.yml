@@ -47,6 +47,12 @@ jobs:
         with:
           name: nupkg
       
+      - name: Troubleshoot
+        run: ls -al
+
+      - name: Troubleshoot2
+        run: ls -al nupkg/
+  
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.2
         with:
