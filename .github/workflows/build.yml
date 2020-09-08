@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build Package 
-    runs-on: windows-latest # using windows agent for net462 build
+    runs-on: windows-latest # using windows agent for net462 build.
 
     steps:
     - uses: actions/checkout@v1
