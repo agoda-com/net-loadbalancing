@@ -38,6 +38,7 @@ jobs:
         path: finalpackage
 
   deploy:
+    if: githun.event_name != 'pull_request'
     needs: build
     name: Deploy Packages
     runs-on: ubuntu-latest
