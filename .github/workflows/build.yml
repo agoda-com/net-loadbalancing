@@ -36,7 +36,7 @@ jobs:
       with:
         name: nupkg
         path: finalpackage
-  
+
   deploy:
     needs: build
     name: Deploy Packages
@@ -46,7 +46,7 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: nupkg
-
+    
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.2
         with:
