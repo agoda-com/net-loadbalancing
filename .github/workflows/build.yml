@@ -2,14 +2,14 @@ name: .NET Core Build and Deploy
 
 on:
   push:
-    branches:
-      - master
+    branches: master
+  pull_request:
+    branches: master
 
 jobs:
   build:
-    if: github.event_name == 'push' && contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
     name: Build Package 
-    runs-on: windows-latest # using windows agent for net462 build
+    runs-on: windows-latest # using windows agent for net462 build.
 
     steps:
     - uses: actions/checkout@v1
