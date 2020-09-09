@@ -6,7 +6,7 @@
     <Product>Agoda.Frameworks.Grpc</Product>
     <Company>Agoda</Company>
     <Description>Agoda.Frameworks.Grpc</Description>
-    <VersionPrefix>7.0.82</VersionPrefix>
+    <VersionPrefix>7.0.83</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
