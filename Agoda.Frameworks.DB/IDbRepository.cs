@@ -14,7 +14,7 @@ namespace Agoda.Frameworks.DB
             CommandType commandType,
             object parameters);
 
-        Task<T> ExecuteQueryAsync<T>(
+        Task<IEnumerable<T>> ExecuteQueryAsync<T>(
             string dbName,
             string sqlCommandString,
             CommandType commandType,
