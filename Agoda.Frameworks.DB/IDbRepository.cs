@@ -8,6 +8,24 @@ namespace Agoda.Frameworks.DB
 {
     public interface IDbRepository
     {
+        Task<object> ExecuteScalarAsync(
+            string dbName,
+            string sqlCommandString,
+            CommandType commandType,
+            object parameters);
+
+        Task<T> ExecuteQueryAsync<T>(
+            string dbName,
+            string sqlCommandString,
+            CommandType commandType,
+            object parameters);
+
+        Task<T> ExecuteQuerySingleAsync<T>(
+            string dbName,
+            string sqlCommandString,
+            CommandType commandType,
+            object parameters);
+
         IEnumerable<TResult> Query<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
             TRequest parameters);

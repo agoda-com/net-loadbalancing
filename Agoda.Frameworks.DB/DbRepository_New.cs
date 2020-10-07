@@ -46,7 +46,7 @@ namespace Agoda.Frameworks.DB
             }
         }
 
-        public async Task<object> ExecuteQueryAsync<T>(
+        public async Task<T> ExecuteQueryAsync<T>(
             string dbName,
             string sqlCommandString,
             CommandType commandType,
@@ -80,7 +80,7 @@ namespace Agoda.Frameworks.DB
             }
         }
 
-        public async Task<object> ExecuteQuerySingleAsync<T>(
+        public async Task<T> ExecuteQuerySingleAsync<T>(
             string dbName,
             string sqlCommandString,
             CommandType commandType,
