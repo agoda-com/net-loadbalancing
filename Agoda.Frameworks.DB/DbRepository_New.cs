@@ -14,9 +14,9 @@ namespace Agoda.Frameworks.DB
     {
         public async Task<object> ExecuteScalarAsync(
             string dbName,
-            string SqlCommandString,
+            string sqlCommandString,
             CommandType commandType,
-            object param)
+            object parameters)
         {
             // Copy-paste cannot be avoided due to ExecuteAsync must be completed inside of SqlConnection.
             var connectionStr = _dbResources.ChooseDb(dbName).SelectRandomly();
@@ -27,8 +27,8 @@ namespace Agoda.Frameworks.DB
                 using (var connection = _generateConnection(connectionStr))
                 {
                     return await connection.ExecuteScalarAsync(
-                        SqlCommandString,
-                        param,
+                        sqlCommandString,
+                        parameters,
                         commandTimeout: DefaultTimeoutSec,
                         commandType: commandType);
                 }
@@ -42,13 +42,13 @@ namespace Agoda.Frameworks.DB
             finally
             {
                 stopwatch.Stop();
-                RaiseOnQueryComplete(new IAmNotAStoredProc(dbName, SqlCommandString, DefaultTimeoutSec, DefaultMaxAttempts), stopwatch.ElapsedMilliseconds, error);
+                RaiseOnQueryComplete(new IAmNotAStoredProc(dbName, sqlCommandString, DefaultTimeoutSec, DefaultMaxAttempts), stopwatch.ElapsedMilliseconds, error);
             }
         }
 
         public async Task<object> ExecuteQueryAsync<T>(
             string dbName,
-            string SqlCommandString,
+            string sqlCommandString,
             CommandType commandType,
             object parameters)
         {
@@ -61,7 +61,7 @@ namespace Agoda.Frameworks.DB
                 using (var connection = _generateConnection(connectionStr))
                 {
                     return await connection.QueryAsync<T>(
-                        SqlCommandString,
+                        sqlCommandString,
                         parameters,
                         commandTimeout: DefaultTimeoutSec,
                         commandType: commandType);
@@ -76,13 +76,13 @@ namespace Agoda.Frameworks.DB
             finally
             {
                 stopwatch.Stop();
-                RaiseOnQueryComplete(new IAmNotAStoredProc(dbName, SqlCommandString, DefaultTimeoutSec, DefaultMaxAttempts), stopwatch.ElapsedMilliseconds, error);
+                RaiseOnQueryComplete(new IAmNotAStoredProc(dbName, sqlCommandString, DefaultTimeoutSec, DefaultMaxAttempts), stopwatch.ElapsedMilliseconds, error);
             }
         }
 
         public async Task<object> ExecuteQuerySingleAsync<T>(
             string dbName,
-            string SqlCommandString,
+            string sqlCommandString,
             CommandType commandType,
             object parameters)
         {
@@ -95,7 +95,7 @@ namespace Agoda.Frameworks.DB
                 using (var connection = _generateConnection(connectionStr))
                 {
                     return await connection.QuerySingleAsync<T>(
-                        SqlCommandString,
+                        sqlCommandString,
                         parameters,
                         commandTimeout: DefaultTimeoutSec,
                         commandType: commandType);
@@ -110,7 +110,7 @@ namespace Agoda.Frameworks.DB
             finally
             {
                 stopwatch.Stop();
-                RaiseOnQueryComplete(new IAmNotAStoredProc(dbName, SqlCommandString, DefaultTimeoutSec, DefaultMaxAttempts), stopwatch.ElapsedMilliseconds, error);
+                RaiseOnQueryComplete(new IAmNotAStoredProc(dbName, sqlCommandString, DefaultTimeoutSec, DefaultMaxAttempts), stopwatch.ElapsedMilliseconds, error);
             }
         }
     }

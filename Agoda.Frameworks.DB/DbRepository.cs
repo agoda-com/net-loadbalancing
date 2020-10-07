@@ -140,7 +140,7 @@ namespace Agoda.Frameworks.DB
             finally
             {
                 stopwatch.Stop();
-                RaiseOnQueryComplete(new , stopwatch.ElapsedMilliseconds, error);
+                RaiseOnQueryComplete(sp, stopwatch.ElapsedMilliseconds, error);
             }
         }
 
