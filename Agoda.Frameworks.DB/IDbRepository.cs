@@ -8,6 +8,23 @@ namespace Agoda.Frameworks.DB
 {
     public interface IDbRepository
     {
+        T ExecuteReader<T>(
+            string database,
+            string storedProc,
+            int timeoutSecs,
+            int maxAttemptCount,
+            IDbDataParameter[] parameters,
+            Func<SqlDataReader, T> callback,
+            TimeSpan? timeSpan);
+
+        Task<T> ExecuteReaderAsync<T>(
+            string database,
+            string storedProc,
+            int timeoutSecs,
+            int maxAttemptCount,
+            IDbDataParameter[] parameters,
+            Func<SqlDataReader, Task<T>> callback,
+            TimeSpan? timeSpan);
         Task<object> ExecuteScalarAsync(
             string dbName,
             string sqlCommandString,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 using Moq;
@@ -67,6 +68,54 @@ namespace Agoda.Frameworks.DB.Tests
                     param2 = "value2"
                 },
                 TimeSpan.MaxValue);
+            Assert.AreEqual(cachedValue, result);
+
+            _cache.Verify(
+                x => x.TryGetValue(_expectedCacheKey, out cachedValue),
+                Times.Once);
+            _dbResources.Verify(x => x.ChooseDb("mobile_ro").SelectRandomly(), Times.Never);
+
+            Assert.AreEqual(0, _onQueryCompleteEvents.Count);
+        }
+
+        [Test]
+        public async Task ExecuteReaderAsync_Hit_Cache_Success()
+        {
+            SetupAsync();
+            
+            object cachedValue = "cachedValue";
+            _cache.Setup(x => x.TryGetValue(It.IsAny<string>(), out cachedValue))
+                .Returns(true);
+            var result = await _db.ExecuteReaderAsync<string>("mobile_ro", "db.v1.sp_foo", 1,
+                2,new IDbDataParameter[]
+                {
+                    new SqlParameter("@param1", "value1"),
+                    new SqlParameter("@param2", "value2")
+
+                }, reader => Task.FromResult(cachedValue.ToString()), TimeSpan.MaxValue);
+            Assert.AreEqual(cachedValue, result);
+
+            _cache.Verify(
+                x => x.TryGetValue(_expectedCacheKey, out cachedValue),
+                Times.Once);
+            _dbResources.Verify(x => x.ChooseDb("mobile_ro").SelectRandomly(), Times.Never);
+
+            Assert.AreEqual(0, _onQueryCompleteEvents.Count);
+        }
+
+        [Test]
+        public void ExecuteReader_Hit_Cache_Success()
+        {
+            object cachedValue = "cachedValue";
+            _cache.Setup(x => x.TryGetValue(It.IsAny<string>(), out cachedValue))
+                .Returns(true);
+            var result = _db.ExecuteReader("mobile_ro", "db.v1.sp_foo", 1,
+                2,new IDbDataParameter[]
+                {
+                    new SqlParameter("@param1", "value1"),
+                    new SqlParameter("@param2", "value2")
+
+                }, reader => cachedValue.ToString(), TimeSpan.MaxValue);
             Assert.AreEqual(cachedValue, result);
 
             _cache.Verify(

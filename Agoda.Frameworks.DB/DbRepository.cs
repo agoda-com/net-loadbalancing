@@ -9,8 +9,6 @@ using Dapper;
 
 namespace Agoda.Frameworks.DB
 {
-    
-
     public partial class DbRepository : IDbRepository
     {
         private readonly IDbResourceManager _dbResources;
