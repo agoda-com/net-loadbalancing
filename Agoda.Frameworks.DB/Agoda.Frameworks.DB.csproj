@@ -3,7 +3,7 @@
     <Authors>Agoda</Authors>
     <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
     <Description>Agoda.Frameworks.DB</Description>
-    <VersionPrefix>7.0.86</VersionPrefix>
+    <VersionPrefix>7.0.87</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
