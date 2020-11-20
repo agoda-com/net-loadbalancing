@@ -49,4 +49,19 @@ namespace Agoda.Frameworks.DB
                 .ToArray();
         }
     }
+
+    public class IAmNotAStoredProc : IStoredProc
+    {
+        public IAmNotAStoredProc(string dbName, string storedProcedureName, int commandTimeoutSecs, int maxAttemptCount)
+        {
+            DbName = dbName;
+            StoredProcedureName = storedProcedureName;
+            CommandTimeoutSecs = commandTimeoutSecs;
+            MaxAttemptCount = maxAttemptCount;
+        }
+        public string DbName { get; }
+        public string StoredProcedureName { get; }
+        public int CommandTimeoutSecs { get; }
+        public int MaxAttemptCount { get; }
+    }
 }
