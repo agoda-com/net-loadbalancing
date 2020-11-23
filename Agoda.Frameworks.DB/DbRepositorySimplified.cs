@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -12,6 +13,22 @@ namespace Agoda.Frameworks.DB
 {
     public partial class DbRepository // new simplified stuff
     {
+        public T ExecuteReader<T>(string database, string storedProc, int timeoutSecs, int maxAttemptCount,
+            IDbDataParameter[] parameters, Func<SqlDataReader, T> callback, TimeSpan? timeSpan)
+        {
+            return ExecuteCacheOrGet(storedProc, parameters,
+                () => ExecuteReader(database, storedProc, timeoutSecs, maxAttemptCount, parameters, callback),
+                timeSpan);
+        }
+
+        public Task<T> ExecuteReaderAsync<T>(string database, string storedProc, int timeoutSecs, int maxAttemptCount,
+            IDbDataParameter[] parameters, Func<SqlDataReader, Task<T>> callback, TimeSpan? timeSpan)
+        {
+            return ExecuteCacheOrGetAsync(storedProc, parameters,
+                () => ExecuteReaderAsync(database, storedProc, timeoutSecs, maxAttemptCount, parameters, callback),
+                timeSpan);
+        }
+
         public async Task<object> ExecuteScalarAsync(
             string dbName,
             string sqlCommandString,
@@ -147,6 +164,18 @@ namespace Agoda.Frameworks.DB
 
             return sb.ToString();
         }
+        private static string CreateCacheKey(string sqlCommandString, IDbDataParameter[] parameters)
+        {
+            var sb = new StringBuilder();
+            sb.Append(sqlCommandString);
+            sb.Append(":");
+            foreach(var p in parameters)
+            {
+                sb.Append($"{p.ParameterName}+{p.Value}&");
+            }
+
+            return sb.ToString();
+        }
         private static bool EnableCache(TimeSpan? timeSpan)
         {
             return timeSpan.HasValue && timeSpan.Value > TimeSpan.Zero;
@@ -159,6 +188,33 @@ namespace Agoda.Frameworks.DB
         {
             return EnableCache(timeSpan)
                 ? _cache.GetOrCreateAsync(
+                    CreateCacheKey(sqlCommandString, parameters),
+                    timeSpan,
+                    getResultFunc)
+                : getResultFunc();
+        }
+        private Task<TFuncResult> ExecuteCacheOrGetAsync<TFuncResult>(
+            string sqlCommandString,
+            IDbDataParameter[] parameters,
+            Func<Task<TFuncResult>> getResultFunc,
+            TimeSpan? timeSpan)
+        {
+            return EnableCache(timeSpan)
+                ? _cache.GetOrCreateAsync(
+                    CreateCacheKey(sqlCommandString, parameters),
+                    timeSpan,
+                    getResultFunc)
+                : getResultFunc();
+        }
+        
+        private TFuncResult ExecuteCacheOrGet<TFuncResult>(
+            string sqlCommandString,
+            IDbDataParameter[] parameters,
+            Func<TFuncResult> getResultFunc,
+            TimeSpan? timeSpan)
+        {
+            return EnableCache(timeSpan)
+                ? _cache.GetOrCreate(
                     CreateCacheKey(sqlCommandString, parameters),
                     timeSpan,
                     getResultFunc)
