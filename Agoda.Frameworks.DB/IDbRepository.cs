@@ -24,7 +24,8 @@ namespace Agoda.Frameworks.DB
             int maxAttemptCount,
             IDbDataParameter[] parameters,
             Func<SqlDataReader, Task<T>> callback,
-            TimeSpan? timeSpan);
+            TimeSpan? timeSpan,
+            string cacheKey);
         Task<object> ExecuteScalarAsync(
             string dbName,
             string sqlCommandString,
@@ -42,14 +43,16 @@ namespace Agoda.Frameworks.DB
             string sqlCommandString,
             CommandType commandType,
             object parameters,
-            TimeSpan? timeSpan);
+            TimeSpan? timeSpan,
+            string cacheKey);
 
         Task<T> ExecuteQuerySingleAsync<T>(
             string dbName,
             string sqlCommandString,
             CommandType commandType,
             object parameters,
-            TimeSpan? timeSpan);
+            TimeSpan? timeSpan,
+            string cacheKey);
         
         Task<T> ExecuteQuerySingleAsync<T>(
             string dbName,

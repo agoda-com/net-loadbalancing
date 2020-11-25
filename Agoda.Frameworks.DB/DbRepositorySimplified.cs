@@ -22,11 +22,11 @@ namespace Agoda.Frameworks.DB
         }
 
         public Task<T> ExecuteReaderAsync<T>(string database, string storedProc, int timeoutSecs, int maxAttemptCount,
-            IDbDataParameter[] parameters, Func<SqlDataReader, Task<T>> callback, TimeSpan? timeSpan)
+            IDbDataParameter[] parameters, Func<SqlDataReader, Task<T>> callback, TimeSpan? timeSpan,string cacheKey = "")
         {
             return ExecuteCacheOrGetAsync(storedProc, parameters,
                 () => ExecuteReaderAsync(database, storedProc, timeoutSecs, maxAttemptCount, parameters, callback),
-                timeSpan);
+                timeSpan, cacheKey);
         }
 
         public async Task<object> ExecuteScalarAsync(
@@ -68,10 +68,12 @@ namespace Agoda.Frameworks.DB
             string sqlCommandString,
             CommandType commandType,
             object parameters,
-            TimeSpan? timeSpan)
+            TimeSpan? timeSpan,
+            string cacheKey = "")
         {
             return ExecuteCacheOrGetAsync(sqlCommandString, parameters,
-                () => ExecuteQueryAsync<T>(dbName, sqlCommandString, commandType, parameters), timeSpan);
+                    () => ExecuteQueryAsync<T>(dbName, sqlCommandString, commandType, parameters), 
+                    timeSpan, cacheKey);
         }
 
         public async Task<IEnumerable<T>> ExecuteQueryAsync<T>(
@@ -113,10 +115,11 @@ namespace Agoda.Frameworks.DB
             string sqlCommandString,
             CommandType commandType,
             object parameters,
-            TimeSpan? timeSpan)
+            TimeSpan? timeSpan,
+            string cacheKey = "")
         {
             return ExecuteCacheOrGetAsync(sqlCommandString, parameters,
-                () => ExecuteQuerySingleAsync<T>(dbName, sqlCommandString, commandType, parameters), timeSpan);
+                () => ExecuteQuerySingleAsync<T>(dbName, sqlCommandString, commandType, parameters), timeSpan, cacheKey);
         }
         
         public async Task<T> ExecuteQuerySingleAsync<T>(
@@ -184,11 +187,12 @@ namespace Agoda.Frameworks.DB
             string sqlCommandString,
             object parameters,
             Func<Task<TFuncResult>> getResultFunc,
-            TimeSpan? timeSpan)
+            TimeSpan? timeSpan,
+            string cacheKey ="")
         {
             return EnableCache(timeSpan)
-                ? _cache.GetOrCreateAsync(
-                    CreateCacheKey(sqlCommandString, parameters),
+                ? _cache.GetOrCreateAsync(string.IsNullOrEmpty(cacheKey)?
+                    CreateCacheKey(sqlCommandString, parameters): cacheKey,
                     timeSpan,
                     getResultFunc)
                 : getResultFunc();
