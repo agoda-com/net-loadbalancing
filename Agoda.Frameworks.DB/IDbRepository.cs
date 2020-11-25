@@ -59,19 +59,23 @@ namespace Agoda.Frameworks.DB
 
         IEnumerable<TResult> Query<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
-            TRequest parameters,string cacheKey);
+            TRequest parameters,
+            string cacheKey);
 
         Task<IEnumerable<TResult>> QueryAsync<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
-            TRequest parameters,string cacheKey);
+            TRequest parameters,
+            string cacheKey);
 
         TResult QueryMultiple<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters,string cacheKey);
+            TRequest parameters,
+            string cacheKey);
 
         Task<TResult> QueryMultipleAsync<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters,string cacheKey);
+            TRequest parameters,
+            string cacheKey);
 
         /// <summary>
         /// Execute parameterized SQL
