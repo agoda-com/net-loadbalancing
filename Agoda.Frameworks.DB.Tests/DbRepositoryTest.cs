@@ -89,6 +89,28 @@ namespace Agoda.Frameworks.DB.Tests
         }
 
         [Test]
+        public void Query_Hit_Cache_By_Provide_Key_By_Client()
+        {
+            var clientKey = "client-key";
+
+            _cache.Setup(x => x.TryGetValue(It.IsAny<string>(), out _cacheRows))
+                .Returns(true);
+            var result = _db.Query(new FakeStoredProc
+            {
+                CacheLifetime = TimeSpan.MaxValue
+            }, "foo", clientKey);
+
+            Assert.AreEqual(_cacheRows, result);
+
+            _cache.Verify(
+                x => x.TryGetValue(clientKey, out _cacheRows),
+                Times.Once);
+            _dbResources.Verify(x => x.ChooseDb("mobile_ro").SelectRandomly(), Times.Never);
+
+            Assert.AreEqual(0, _onQueryCompleteEvents.Count);
+        }
+
+        [Test]
         public void Query_No_Cache_Lifetime()
         {
             _cache.Setup(x => x.TryGetValue(It.IsAny<string>(), out _cacheRows))

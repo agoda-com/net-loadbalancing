@@ -60,11 +60,12 @@ namespace Agoda.Frameworks.DB
         private TFuncResult ExecuteCacheOrGet<TRequest, TResult, TFuncResult>(
             IStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            Func<TFuncResult> getResultFunc)
+            Func<TFuncResult> getResultFunc,
+            string cacheKey = "")
         {
             return EnableCache(sp)
-                ? _cache.GetOrCreate(
-                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName),
+                ? _cache.GetOrCreate(string.IsNullOrEmpty(cacheKey) ?
+                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName) : cacheKey,
                     sp.CacheLifetime,
                     getResultFunc)
                 : getResultFunc();
@@ -73,11 +74,12 @@ namespace Agoda.Frameworks.DB
         private Task<TFuncResult> ExecuteCacheOrGetAsync<TRequest, TResult, TFuncResult>(
             IStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            Func<Task<TFuncResult>> getResultFunc)
+            Func<Task<TFuncResult>> getResultFunc,
+            string cacheKey = "")
         {
             return EnableCache(sp)
-                ? _cache.GetOrCreateAsync(
-                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName),
+                ? _cache.GetOrCreateAsync(string.IsNullOrEmpty(cacheKey) ?
+                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName): cacheKey,
                     sp.CacheLifetime,
                     getResultFunc)
                 : getResultFunc();
@@ -85,30 +87,34 @@ namespace Agoda.Frameworks.DB
 
         public IEnumerable<TResult> Query<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGet(sp, parameters, () => QueryImpl(sp, parameters));
+            return ExecuteCacheOrGet(sp, parameters, () => QueryImpl(sp, parameters), cacheKey);
         }
 
         public Task<IEnumerable<TResult>> QueryAsync<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryAsyncImpl(sp, parameters));
+            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryAsyncImpl(sp, parameters), cacheKey);
         }
 
         public TResult QueryMultiple<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGet(sp, parameters, () => QueryMultipleImpl(sp, parameters));
+            return ExecuteCacheOrGet(sp, parameters, () => QueryMultipleImpl(sp, parameters), cacheKey);
         }
 
         public Task<TResult> QueryMultipleAsync<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryMultipleAsyncImpl(sp, parameters));
+            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryMultipleAsyncImpl(sp, parameters), cacheKey);
         }
 
         public int ExecuteNonQuery<TRequest>(
