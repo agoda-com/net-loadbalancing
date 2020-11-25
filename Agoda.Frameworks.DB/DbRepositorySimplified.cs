@@ -201,11 +201,12 @@ namespace Agoda.Frameworks.DB
             string sqlCommandString,
             IDbDataParameter[] parameters,
             Func<Task<TFuncResult>> getResultFunc,
-            TimeSpan? timeSpan)
+            TimeSpan? timeSpan,
+             string cacheKey = "")
         {
             return EnableCache(timeSpan)
-                ? _cache.GetOrCreateAsync(
-                    CreateCacheKey(sqlCommandString, parameters),
+                ? _cache.GetOrCreateAsync(string.IsNullOrEmpty(cacheKey) ?
+                    CreateCacheKey(sqlCommandString, parameters): cacheKey,
                     timeSpan,
                     getResultFunc)
                 : getResultFunc();

@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Moq;
+using NUnit.Framework;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Dapper;
-using Moq;
-using Moq.Dapper;
-using NUnit.Framework;
 
 namespace Agoda.Frameworks.DB.Tests
 {
