@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Moq;
+using NUnit.Framework;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Dapper;
-using Moq;
-using Moq.Dapper;
-using NUnit.Framework;
 
 namespace Agoda.Frameworks.DB.Tests
 {
@@ -72,6 +70,31 @@ namespace Agoda.Frameworks.DB.Tests
 
             _cache.Verify(
                 x => x.TryGetValue(_expectedCacheKey, out cachedValue),
+                Times.Once);
+            _dbResources.Verify(x => x.ChooseDb("mobile_ro").SelectRandomly(), Times.Never);
+
+            Assert.AreEqual(0, _onQueryCompleteEvents.Count);
+        }
+
+        [Test]
+        public async Task ExecuteQuerySingleAsync_Hit_Cache_By_Client_Key_Success()
+        {
+            SetupAsync();
+
+            var cacheKey = "client-key";
+            object cachedValue = "cachedValue";
+            _cache.Setup(x => x.TryGetValue(cacheKey, out cachedValue))
+                .Returns(true);
+            var result = await _db.ExecuteQuerySingleAsync<string>("mobile_ro", "db.v1.sp_foo", CommandType.StoredProcedure, new
+            {
+                param1 = "value1",
+                param2 = "value2"
+            },
+                TimeSpan.MaxValue, cacheKey);
+            Assert.AreEqual(cachedValue, result);
+
+            _cache.Verify(
+                x => x.TryGetValue(cacheKey, out cachedValue),
                 Times.Once);
             _dbResources.Verify(x => x.ChooseDb("mobile_ro").SelectRandomly(), Times.Never);
 
