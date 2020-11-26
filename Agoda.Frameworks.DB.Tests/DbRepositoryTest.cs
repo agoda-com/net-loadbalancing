@@ -11,7 +11,7 @@ namespace Agoda.Frameworks.DB.Tests
 {
     public class DbRepositoryTest
     {
-        protected DbRepository _db;
+        protected IDbRepository _db;
         protected Mock<IDbResourceManager> _dbResources;
         protected Mock<IDbCache> _cache;
         protected Mock<IDbConnection> _connection;

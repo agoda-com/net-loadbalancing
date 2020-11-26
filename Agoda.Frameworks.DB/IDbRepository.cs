@@ -25,7 +25,7 @@ namespace Agoda.Frameworks.DB
             IDbDataParameter[] parameters,
             Func<SqlDataReader, Task<T>> callback,
             TimeSpan? timeSpan,
-            string cacheKey);
+            string cacheKey = "");
         Task<object> ExecuteScalarAsync(
             string dbName,
             string sqlCommandString,
@@ -44,7 +44,7 @@ namespace Agoda.Frameworks.DB
             CommandType commandType,
             object parameters,
             TimeSpan? timeSpan,
-            string cacheKey);
+            string cacheKey = "");
 
         Task<T> ExecuteQuerySingleAsync<T>(
             string dbName,
@@ -52,7 +52,7 @@ namespace Agoda.Frameworks.DB
             CommandType commandType,
             object parameters,
             TimeSpan? timeSpan,
-            string cacheKey);
+            string cacheKey = "");
         
         Task<T> ExecuteQuerySingleAsync<T>(
             string dbName,
@@ -63,22 +63,22 @@ namespace Agoda.Frameworks.DB
         IEnumerable<TResult> Query<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            string cacheKey);
+            string cacheKey = "");
 
         Task<IEnumerable<TResult>> QueryAsync<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            string cacheKey);
+            string cacheKey = "");
 
         TResult QueryMultiple<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            string cacheKey);
+            string cacheKey = "");
 
         Task<TResult> QueryMultipleAsync<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            string cacheKey);
+            string cacheKey = "");
 
         /// <summary>
         /// Execute parameterized SQL
