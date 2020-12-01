@@ -164,6 +164,20 @@ namespace Agoda.Frameworks.LoadBalancing.Test
             Assert.AreEqual(0, onUpdateWeightCount);
             Assert.AreSame(oldResources, mgr.Resources);
         }
+        
+        [Test]
+        public void Create_ShouldWorkCorrectly()
+        {
+            var mgr = ResourceManager.Create(new[] { "tgt", "ccc", "ttt" });
+            Assert.AreEqual(mgr.Resources.Count, 3);
+        }
+
+        [Test]
+        public void Create_WithDuplicateItem_ShouldRemoveDuplicate()
+        {
+            var mgr = ResourceManager.Create(new[] { "tgt", "tgt", "ttt" });
+            Assert.AreEqual(mgr.Resources.Count, 2);
+        }
 
         [Test]
         public void UpdateWeight_ReplacementWhenWeightChange()

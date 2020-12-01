@@ -22,12 +22,19 @@ namespace Agoda.Frameworks.LoadBalancing
 
     public static class ResourceManager
     {
-        public static IResourceManager<TSource> Create<TSource>(IEnumerable<TSource> sources) =>
-            new ResourceManager<TSource>(
-                sources.ToDictionary(
-                    x => x,
-                    _ => WeightItem.CreateDefaultItem()),
-                new AgodaWeightManipulationStrategy());
+        public static IResourceManager<TSource> Create<TSource>(IEnumerable<TSource> sources)
+        {
+            var resources = new Dictionary<TSource, WeightItem>();
+
+            foreach (var source in sources)
+            {
+                if (!resources.ContainsKey(source))
+                {
+                    resources.Add(source,  WeightItem.CreateDefaultItem());
+                }
+            }
+            return new ResourceManager<TSource>(resources, new AgodaWeightManipulationStrategy());
+        }
     }
 
     public class ResourceManager<TSource> : IResourceManager<TSource>
