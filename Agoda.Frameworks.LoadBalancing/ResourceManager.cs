@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -24,14 +25,11 @@ namespace Agoda.Frameworks.LoadBalancing
     {
         public static IResourceManager<TSource> Create<TSource>(IEnumerable<TSource> sources)
         {
-            var resources = new Dictionary<TSource, WeightItem>();
+            var resources = new ConcurrentDictionary<TSource, WeightItem>();
 
             foreach (var source in sources)
             {
-                if (!resources.ContainsKey(source))
-                {
-                    resources.Add(source,  WeightItem.CreateDefaultItem());
-                }
+                resources.GetOrAdd(source,  WeightItem.CreateDefaultItem());
             }
             return new ResourceManager<TSource>(resources, new AgodaWeightManipulationStrategy());
         }
