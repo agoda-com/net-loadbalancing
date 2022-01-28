@@ -12,10 +12,10 @@ namespace Agoda.Frameworks.LoadBalancing.Benchmark
     public class UpdateWeightBenchmark
     {
 
-        [Params(10, 50, 100)]
+        [Params(100)]
         public int numberOfRoutes;
 
-        [Params(10, 100, 1000, 10000)]
+        [Params(1000, 10000)]
         public int numberOfRuns;
 
         private Dictionary<string, WeightItem> Resource;

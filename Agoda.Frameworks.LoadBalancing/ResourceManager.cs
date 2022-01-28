@@ -90,10 +90,11 @@ namespace Agoda.Frameworks.LoadBalancing
 
         public void UpdateWeight(TSource source, bool isSuccess)
         {
+            var oldCollection = _collection;
             if (_collection.ContainsKey(source))
             {
                 _collection[source].UpdateWeight(_weightManipulationStrategy, isSuccess);
-                RaiseWeightUpdateEvent(_collection);
+                RaiseWeightUpdateEvent(_collection, oldCollection);
             }
         }
 
@@ -127,18 +128,15 @@ namespace Agoda.Frameworks.LoadBalancing
             {
                 RaiseWeightUpdateEvent(oldCollection, newCollection);
             }
-            if(oldCollection != newCollection)
-            {
-                RaiseWeightUpdateEvent(newCollection);
-            }
         }
 
-        private void RaiseWeightUpdateEvent(ImmutableDictionary<TSource, WeightItem> newCollection)
+        private void RaiseWeightUpdateEvent(ImmutableDictionary<TSource, WeightItem> oldCollection,
+            ImmutableDictionary<TSource, WeightItem> newCollection)
         {
-            RaiseOnUpdateWeight(newCollection.Values);
+            RaiseOnUpdateWeight(oldCollection, newCollection);
             if (newCollection.Values.All(x => x.Weight == x.MinWeight))
             {
-                RaiseOnAllSourcesReachBottom(newCollection.Values);
+                RaiseOnAllSourcesReachBottom(oldCollection, newCollection);
             }
         }
 
@@ -156,48 +154,5 @@ namespace Agoda.Frameworks.LoadBalancing
                 this,
                 new UpdateWeightEventArgs<TSource>(oldCollection, newCollection));
     }
-
-    public static class ResourceManagerExtension
-    {
-        public static void UpdateResources<TSource>(
-            this IResourceManager<TSource> mgr,
-            IEnumerable<TSource> collection)
-        {
-            mgr.UpdateResources(
-                collection
-                .Distinct()
-                .ToDictionary(x => x, _ => WeightItem.CreateDefaultItem()));
-        }
-
-        // TODO: Test
-        public static TResult ExecuteAction<TSource, TResult>(
-            this IResourceManager<TSource> mgr,
-            RandomSourceFunc<TSource, TResult> func,
-            ShouldRetryPredicate shouldRetry,
-            OnError onError = null)
-        {
-            var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
-            return retryAction.ExecuteAction(func, shouldRetry, onError);
-        }
-
-        public static Task<TResult> ExecuteAsync<TSource, TResult>(
-            this IResourceManager<TSource> mgr,
-            RandomSourceAsyncFunc<TSource, TResult> taskFunc,
-            ShouldRetryPredicate shouldRetry,
-            OnError onError = null)
-        {
-            var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
-            return retryAction.ExecuteAsync(taskFunc, shouldRetry, onError);
-        }
-
-        public static Task<IReadOnlyList<RetryActionResult<TSource, TResult>>> ExecuteAsyncWithDiag<TSource, TResult>(
-            this IResourceManager<TSource> mgr,
-            RandomSourceAsyncFunc<TSource, TResult> taskFunc,
-            ShouldRetryPredicate shouldRetry,
-            OnError onError = null)
-        {
-            var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
-            return retryAction.ExecuteAsyncWithDiag(taskFunc, shouldRetry, onError);
-        }
-    }
+    
 }
