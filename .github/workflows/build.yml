@@ -22,6 +22,7 @@ jobs:
       with:
         dotnet-version: '6.0.x'
 
+
     - name: Restore
       run: dotnet restore
 
@@ -32,6 +33,15 @@ jobs:
     - name: Test
       run: dotnet test
 
+    - name: Benchmark
+      run: ./Agoda.Frameworks.LoadBalancing.Benchmark/bin/Release/net6.0/Agoda.Frameworks.LoadBalancing.Benchmark
+
+    - name: Publish Benchmark Results artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: BenchmarkDotNet
+        path: BenchmarkDotNet.Artifacts
+
     - name: Pack Release
       if: github.ref == 'refs/heads/master'
       run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
@@ -40,7 +50,7 @@ jobs:
       if: github.ref != 'refs/heads/master'
       run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}-preview
 
-    - name: Publish artifact
+    - name: Publish nuget artifact
       uses: actions/upload-artifact@master
       with:
         name: nupkg
