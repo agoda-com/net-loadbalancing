@@ -8,11 +8,8 @@
     <VersionPrefix>7.0.84</VersionPrefix>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(OS)'!='Windows_NT'">
+  <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(OS)'=='Windows_NT'">
-    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
