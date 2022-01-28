@@ -58,7 +58,7 @@ namespace Agoda.Frameworks.LoadBalancing.Test
             mgr.OnUpdateWeight += (sender, args) =>
             {
                 onUpdateWeightCount++;
-                Assert.AreEqual(_newWeightItem, args.WeightItems.First());
+                Assert.AreEqual(_newWeightItem, args.NewResources.Values.First());
             };
 
             mgr.UpdateWeight("tgt", true);
@@ -80,7 +80,7 @@ namespace Agoda.Frameworks.LoadBalancing.Test
             mgr.OnAllSourcesReachBottom += (sender, args) =>
             {
                 onEventRaised++;
-                Assert.AreEqual(_newWeightItem, args.WeightItems.First());
+                Assert.AreEqual(_newWeightItem, args.NewResources.Values.First());
             };
 
             mgr.UpdateWeight("tgt", false);
@@ -120,6 +120,76 @@ namespace Agoda.Frameworks.LoadBalancing.Test
             Assert.AreNotEqual(newDict["keep_unchanged"], mgr.Resources["keep_unchanged"]);
             // remove
             Assert.IsFalse(mgr.Resources.ContainsKey("remove"));
+        }
+
+        [Test]
+        public void UpdateResources_AgodaWeight()
+        {
+            var mgr = ResourceManager.Create(new[] { "remove", "keep", "keep_unchanged" });
+            // Change weight
+            mgr.UpdateWeight("keep", false);
+
+            mgr.UpdateResources(new[] { "keep", "keep_unchanged", "add" });
+
+            // add
+            Assert.IsTrue(WeightItem.CreateDefaultItem().Equals(mgr.Resources["add"]));
+            // keep
+            Assert.AreEqual(WeightItem.CreateDefaultItem().MaxWeight, mgr.Resources["keep"].MaxWeight);
+            Assert.AreNotEqual(WeightItem.CreateDefaultItem().Weight, mgr.Resources["keep"].Weight);
+            // keep_unchanged
+            Assert.IsTrue(WeightItem.CreateDefaultItem().Equals(mgr.Resources["keep_unchanged"]));
+            // remove
+            Assert.IsFalse(mgr.Resources.ContainsKey("remove"));
+        }
+
+        [Test]
+        public void UpdateWeight_NoReplacementWhenNoWeightChange()
+        {
+            _newWeightItem = _dict["tgt"];
+            var mgr = ResourceManager.Create(new[] { "tgt" });
+            var onUpdateWeightCount = 0;
+            mgr.OnUpdateWeight += (sender, args) =>
+            {
+                onUpdateWeightCount++;
+            };
+
+            var oldResources = mgr.Resources;
+            mgr.UpdateWeight("tgt", true);
+
+            Assert.AreEqual(0, onUpdateWeightCount);
+            Assert.AreSame(oldResources, mgr.Resources);
+        }
+        
+        [Test]
+        public void Create_ShouldWorkCorrectly()
+        {
+            var mgr = ResourceManager.Create(new[] { "tgt", "ccc", "ttt" });
+            Assert.AreEqual(mgr.Resources.Count, 3);
+        }
+
+        [Test]
+        public void Create_WithDuplicateItem_ShouldRemoveDuplicate()
+        {
+            var mgr = ResourceManager.Create(new[] { "tgt", "tgt", "ttt" });
+            Assert.AreEqual(mgr.Resources.Count, 2);
+        }
+
+        [Test]
+        public void UpdateWeight_ReplacementWhenWeightChange()
+        {
+            _newWeightItem = _dict["tgt"];
+            var mgr = ResourceManager.Create(new[] { "tgt" });
+            var onUpdateWeightCount = 0;
+            mgr.OnUpdateWeight += (sender, args) =>
+            {
+                onUpdateWeightCount++;
+            };
+
+            var oldResources = mgr.Resources;
+            mgr.UpdateWeight("tgt", false);
+
+            Assert.AreEqual(1, onUpdateWeightCount);
+            Assert.AreNotSame(oldResources, mgr.Resources);
         }
     }
 }

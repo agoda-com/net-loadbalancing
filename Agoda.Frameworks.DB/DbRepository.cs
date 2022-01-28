@@ -9,84 +9,7 @@ using Dapper;
 
 namespace Agoda.Frameworks.DB
 {
-    public interface IDbRepository
-    {
-        IEnumerable<TResult> Query<TRequest, TResult>(
-            IStoredProc<TRequest, TResult> sp,
-            TRequest parameters);
-
-        Task<IEnumerable<TResult>> QueryAsync<TRequest, TResult>(
-            IStoredProc<TRequest, TResult> sp,
-            TRequest parameters);
-
-        TResult QueryMultiple<TRequest, TResult>(
-            IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters);
-
-        Task<TResult> QueryMultipleAsync<TRequest, TResult>(
-            IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters);
-
-        /// <summary>
-        /// Execute parameterized SQL
-        /// </summary>
-        /// <returns>Number of rows affected</returns>
-        int ExecuteNonQuery<TRequest>(
-            IStoredProc<TRequest> sp,
-            TRequest parameters);
-
-        /// <summary>
-        /// Execute parameterized SQL
-        /// </summary>
-        /// <returns>Number of rows affected</returns>
-        Task<int> ExecuteNonQueryAsync<TRequest>(
-            IStoredProc<TRequest> sp,
-            TRequest parameters);
-
-        /// <summary>
-        /// Execute stored procedure and builds a SqlDataReader.
-        /// </summary>
-        /// <param name="database">Database name. Should use the keys from IDbResources.</param>
-        /// <param name="storedProc">Stored procedure name.</param>
-        /// <param name="timeoutSecs">Command timeout value in seconds.</param>
-        /// <param name="maxAttemptCount">Maximum attempt count including retries.</param>
-        /// <param name="parameters">Parameters for SQL command.</param>
-        /// <param name="callback">Callback function for generated SqlDataReader.</param>
-        /// <remarks>Retry is not only applied to SQL connection, but also the invocation of callback.
-        /// Do not put anything which is not related to SqlReader into callback.</remarks>
-        T ExecuteReader<T>(
-            string database,
-            string storedProc,
-            int timeoutSecs,
-            int maxAttemptCount,
-            IDbDataParameter[] parameters,
-            Func<SqlDataReader, T> callback);
-
-        /// <summary>
-        /// Execute stored procedure and builds a SqlDataReader asynchronously.
-        /// </summary>
-        /// <param name="database">Database name. Should use the keys from IDbResources.</param>
-        /// <param name="storedProc">Stored procedure name.</param>
-        /// <param name="timeoutSecs">Command timeout value in seconds.</param>
-        /// <param name="maxAttemptCount">Maximum attempt count including retries.</param>
-        /// <param name="parameters">Parameters for SQL command.</param>
-        /// <param name="callback">Callback function for generated SqlDataReader.</param>
-        /// <remarks>Retry is not only applied to SQL connection, but also the invocation of callback.
-        /// Do not put anything which is not related to SqlReader into callback.</remarks>
-        Task<T> ExecuteReaderAsync<T>(
-            string database,
-            string storedProc,
-            int timeoutSecs,
-            int maxAttemptCount,
-            IDbDataParameter[] parameters,
-            Func<SqlDataReader, Task<T>> callback);
-
-        event EventHandler<DbErrorEventArgs> OnError;
-        event EventHandler<QueryCompleteEventArgs> OnQueryComplete;
-        event EventHandler<ExecuteReaderCompleteEventArgs> OnExecuteReaderComplete;
-    }
-
-    public class DbRepository : IDbRepository
+    public partial class DbRepository : IDbRepository
     {
         private readonly IDbResourceManager _dbResources;
         private readonly IDbCache _cache;
@@ -104,6 +27,8 @@ namespace Agoda.Frameworks.DB
             _dbResources = dbResources;
             _cache = cache;
             _generateConnection = generateConnection;
+            DefaultTimeoutSec = 5;
+            DefaultMaxAttempts = 3;
         }
 
         public DbRepository(
@@ -112,6 +37,16 @@ namespace Agoda.Frameworks.DB
             : this(dbResources, cache, connStr => new SqlConnection(connStr))
         {
         }
+
+        public DbRepository(
+            IDbResourceManager dbResources)
+            : this(dbResources, new DummyCache(), connStr => new SqlConnection(connStr))
+        {
+        }
+
+        public int DefaultTimeoutSec { get; set; }
+
+        public int DefaultMaxAttempts { get; set; }
 
         // TODO: Handle SqlException
         protected virtual ShouldRetryPredicate ShouldRetry(int maxAttemptCount)
@@ -125,11 +60,12 @@ namespace Agoda.Frameworks.DB
         private TFuncResult ExecuteCacheOrGet<TRequest, TResult, TFuncResult>(
             IStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            Func<TFuncResult> getResultFunc)
+            Func<TFuncResult> getResultFunc,
+            string cacheKey = "")
         {
             return EnableCache(sp)
-                ? _cache.GetOrCreate(
-                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName),
+                ? _cache.GetOrCreate(string.IsNullOrEmpty(cacheKey) ?
+                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName) : cacheKey,
                     sp.CacheLifetime,
                     getResultFunc)
                 : getResultFunc();
@@ -138,11 +74,12 @@ namespace Agoda.Frameworks.DB
         private Task<TFuncResult> ExecuteCacheOrGetAsync<TRequest, TResult, TFuncResult>(
             IStoredProc<TRequest, TResult> sp,
             TRequest parameters,
-            Func<Task<TFuncResult>> getResultFunc)
+            Func<Task<TFuncResult>> getResultFunc,
+            string cacheKey = "")
         {
             return EnableCache(sp)
-                ? _cache.GetOrCreateAsync(
-                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName),
+                ? _cache.GetOrCreateAsync(string.IsNullOrEmpty(cacheKey) ?
+                    sp.GetParameters(parameters).CreateCacheKey(sp.StoredProcedureName): cacheKey,
                     sp.CacheLifetime,
                     getResultFunc)
                 : getResultFunc();
@@ -150,30 +87,34 @@ namespace Agoda.Frameworks.DB
 
         public IEnumerable<TResult> Query<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGet(sp, parameters, () => QueryImpl(sp, parameters));
+            return ExecuteCacheOrGet(sp, parameters, () => QueryImpl(sp, parameters), cacheKey);
         }
 
         public Task<IEnumerable<TResult>> QueryAsync<TRequest, TResult>(
             IStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryAsyncImpl(sp, parameters));
+            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryAsyncImpl(sp, parameters), cacheKey);
         }
 
         public TResult QueryMultiple<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGet(sp, parameters, () => QueryMultipleImpl(sp, parameters));
+            return ExecuteCacheOrGet(sp, parameters, () => QueryMultipleImpl(sp, parameters), cacheKey);
         }
 
         public Task<TResult> QueryMultipleAsync<TRequest, TResult>(
             IMultipleStoredProc<TRequest, TResult> sp,
-            TRequest parameters)
+            TRequest parameters,
+            string cacheKey = "")
         {
-            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryMultipleAsyncImpl(sp, parameters));
+            return ExecuteCacheOrGetAsync(sp, parameters, () => QueryMultipleAsyncImpl(sp, parameters), cacheKey);
         }
 
         public int ExecuteNonQuery<TRequest>(

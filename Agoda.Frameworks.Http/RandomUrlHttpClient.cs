@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Agoda.Frameworks.LoadBalancing;
@@ -56,7 +58,9 @@ namespace Agoda.Frameworks.Http
 
         private static ShouldRetryPredicate GetRetryCountPredicate(int maxRetry) => (attemptCount, e) =>
         {
-            if (e is TimeoutException || e is TransientHttpRequestException)
+            if (e is TimeoutException ||
+                e is TransientHttpRequestException ||
+                e is ServiceUnavailableException)
             {
                 return attemptCount < maxRetry;
             }
@@ -65,13 +69,17 @@ namespace Agoda.Frameworks.Http
 
         public void UpdateBaseUrls(string[] baseUrls)
         {
-            var dict = baseUrls.ToDictionary(x => x, x => WeightItem.CreateDefaultItem());
+            var dict = baseUrls
+                .Distinct()
+                .ToDictionary(x => x, _ => WeightItem.CreateDefaultItem());
             UrlResourceManager.UpdateResources(dict);
         }
 
         private static IResourceManager<string> CreateResourceManager(string[] baseUrls)
         {
-            var dict = baseUrls.ToDictionary(x => x, x => WeightItem.CreateDefaultItem());
+            var dict = baseUrls
+                .Distinct()
+                .ToDictionary(x => x, x => WeightItem.CreateDefaultItem());
             var mgr = new ResourceManager<string>(dict, new AgodaWeightManipulationStrategy());
             return mgr;
         }
@@ -84,21 +92,53 @@ namespace Agoda.Frameworks.Http
             }
         }
 
-        public Task<HttpResponseMessage> PostAsync(string url, HttpContent content) =>
-            SendAsync(url, uri => HttpClient.PostAsync(uri, content));
-
         public Task<HttpResponseMessage> GetAsync(string url) =>
             SendAsync(url, uri => HttpClient.GetAsync(uri));
 
+#if !NET462
+        public Task<HttpResponseMessage> PostAsync(string url, HttpContent content) =>
+            SendAsync(url, uri => HttpClient.PostAsync(uri, content));
+
         public Task<HttpResponseMessage> PutAsync(string url, HttpContent content) =>
             SendAsync(url, uri => HttpClient.PutAsync(uri, content));
+#endif
+        public Task<HttpResponseMessage> PostJsonAsync(string url, string json) =>
+            SendAsync(url, uri => HttpClient.PostAsync(uri, new StringContent(json, Encoding.UTF8, "application/json")));
+
+        public Task<HttpResponseMessage> PutJsonAsync(string url, string json) =>
+            SendAsync(url, uri => HttpClient.PutAsync(uri, new StringContent(json, Encoding.UTF8, "application/json")));
 
         public Task<HttpResponseMessage> DeleteAsync(string url) =>
             SendAsync(url, uri => HttpClient.DeleteAsync(uri));
 
-        private Task<HttpResponseMessage> SendAsync(string url, Func<string, Task<HttpResponseMessage>> send)
+        public Task<HttpResponseMessage> SendAsync(
+            string url,
+            Func<string, HttpRequestMessage> requestMsg) =>
+            SendAsync(url, uri => HttpClient.SendAsync(requestMsg(uri)));
+
+        public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
+            string url,
+            Func<string, HttpRequestMessage> requestMsg) =>
+            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(requestMsg(uri)));
+
+        private async Task<HttpResponseMessage> SendAsync(
+            string url,
+            Func<string, Task<HttpResponseMessage>> send)
         {
-            return UrlResourceManager.ExecuteAsync(async (source, _) =>
+            var results = await SendAsyncWithDiag(url, send);
+            var result = results.Last();
+            if (result.IsError)
+            {
+                throw result.Exception;
+            }
+            return result.Result;
+        }
+
+        private Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
+            string url,
+            Func<string, Task<HttpResponseMessage>> send)
+        {
+            return UrlResourceManager.ExecuteAsyncWithDiag(async (source, _) =>
             {
                 var combinedUrl = $"{source.TrimEnd('/')}/{url.TrimStart('/')}";
                 // Special timeout handling for HttpClient
@@ -114,32 +154,39 @@ namespace Agoda.Frameworks.Http
                         if (IsTransientHttpStatusCode(res.StatusCode))
                         {
                             throw new TransientHttpRequestException(
-                                res.StatusCode,
+                                url,
+                                combinedUrl, 
+                                res,
                                 $"Response status code does not indicate success: ${res.StatusCode}");
                         }
-                        res.EnsureSuccessStatusCode();
+                        if (!res.IsSuccessStatusCode)
+                        {
+                            throw new HttpErrorResponseException(
+                                url,
+                                combinedUrl,
+                                res);
+                        }
                         var errorCode = _isErrorResponse(res, await res.Content.ReadAsStringAsync());
                         if (errorCode > 0)
                         {
-                            throw new HttpErrorResponseException(errorCode);
+                            throw new HttpErrorResponseException(
+                                url,
+                                combinedUrl,
+                                res);
                         }
                         return res;
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        throw new ServiceUnavailableException(url, combinedUrl, e.Message, e);
                     }
                     catch (TaskCanceledException e)
                         when (!cts.Token.IsCancellationRequested)
                     {
-                        throw new TimeoutException("Operation timeout", e);
+                        throw new RequestTimeoutException(url, combinedUrl, "Operation timeout", e);
                     }
                 }
-
             }, _shouldRetry, RaiseOnError);
-        }
-
-        private static bool IsTransientException(Exception e)
-        {
-            return e is WebException webException &&
-                webException.Response is HttpWebResponse res &&
-                IsTransientHttpStatusCode(res.StatusCode);
         }
 
         private static bool IsTransientHttpStatusCode(HttpStatusCode code)

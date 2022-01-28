@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Net;
+using System.Net.Http;
 
 namespace Agoda.Frameworks.Http
 {
-    public class TransientHttpRequestException : Exception
+    public class TransientHttpRequestException : RouteResException
     {
-        public TransientHttpRequestException(HttpStatusCode statusCode, string message)
-            : base(message)
+        public TransientHttpRequestException(
+            string uri,
+            string absoluteUri,
+            HttpResponseMessage res,
+            string message)
+            : base(uri, absoluteUri, message, res)
         {
-            StatusCode = statusCode;
         }
 
-        public HttpStatusCode StatusCode { get; }
+        public HttpStatusCode StatusCode => Response.StatusCode;
     }
 }

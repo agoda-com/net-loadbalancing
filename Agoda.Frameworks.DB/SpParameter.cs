@@ -8,7 +8,7 @@ namespace Agoda.Frameworks.DB
         public readonly string Name;
         public readonly object Value;
 
-        private SpParameter(string name, object value)
+        internal SpParameter(string name, object value)
         {
             Name = name;
             Value = value;
@@ -52,7 +52,7 @@ namespace Agoda.Frameworks.DB
             }
 
             return parameters?
-                .OrderBy(x => x.Name)
+                .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
                 .Aggregate(
                     $"{dbPrefix}{spName}:",
                     (seed, pair) =>

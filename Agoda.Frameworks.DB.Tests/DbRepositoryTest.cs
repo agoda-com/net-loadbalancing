@@ -7,19 +7,19 @@ using Moq;
 using Moq.Dapper;
 using NUnit.Framework;
 
-namespace Agoda.Frameworks.DB.Test
+namespace Agoda.Frameworks.DB.Tests
 {
     public class DbRepositoryTest
     {
-        private DbRepository _db;
-        private Mock<IDbResourceManager> _dbResources;
-        private Mock<IDbCache> _cache;
-        private Mock<IDbConnection> _connection;
-        private string[] _expectedRows;
-        private object _cacheRows;
-        private readonly string _expectedCacheKey = "db.v1.sp_foo:@param1+value1&@param2+value2&";
-        private List<DbErrorEventArgs> _onErrorEvents;
-        private List<QueryCompleteEventArgs> _onQueryCompleteEvents;
+        protected IDbRepository _db;
+        protected Mock<IDbResourceManager> _dbResources;
+        protected Mock<IDbCache> _cache;
+        protected Mock<IDbConnection> _connection;
+        protected string[] _expectedRows;
+        protected object _cacheRows;
+        protected readonly string _expectedCacheKey = "db.v1.sp_foo:@param1+value1&@param2+value2&";
+        protected List<DbErrorEventArgs> _onErrorEvents;
+        protected List<QueryCompleteEventArgs> _onQueryCompleteEvents;
 
         [SetUp]
         public void SetUp()
@@ -53,7 +53,7 @@ namespace Agoda.Frameworks.DB.Test
             _db.OnQueryComplete += (sender, args) => _onQueryCompleteEvents.Add(args);
         }
 
-        private void SetupAsync()
+        protected void SetupAsync()
         {
             // We can only call either SetupDapper or SetupDapperAsync once.
             // Testing async methods helped me to find a bug of Cache.CreateOrGet.
@@ -82,6 +82,28 @@ namespace Agoda.Frameworks.DB.Test
 
             _cache.Verify(
                 x => x.TryGetValue(_expectedCacheKey, out _cacheRows),
+                Times.Once);
+            _dbResources.Verify(x => x.ChooseDb("mobile_ro").SelectRandomly(), Times.Never);
+
+            Assert.AreEqual(0, _onQueryCompleteEvents.Count);
+        }
+
+        [Test]
+        public void Query_Hit_Cache_By_Provide_Key_By_Client()
+        {
+            var clientKey = "client-key";
+
+            _cache.Setup(x => x.TryGetValue(It.IsAny<string>(), out _cacheRows))
+                .Returns(true);
+            var result = _db.Query(new FakeStoredProc
+            {
+                CacheLifetime = TimeSpan.MaxValue
+            }, "foo", clientKey);
+
+            Assert.AreEqual(_cacheRows, result);
+
+            _cache.Verify(
+                x => x.TryGetValue(clientKey, out _cacheRows),
                 Times.Once);
             _dbResources.Verify(x => x.ChooseDb("mobile_ro").SelectRandomly(), Times.Never);
 
@@ -643,7 +665,7 @@ namespace Agoda.Frameworks.DB.Test
             Assert.IsNotNull(_onQueryCompleteEvents[1].Error);
         }
 
-        private class FakeStoredProc : IStoredProc<string, string>
+        protected class FakeStoredProc : IStoredProc<string, string>
         {
             public string DbName => "mobile_ro";
             public string StoredProcedureName => "sp_foo";

@@ -1,12 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Authors>mobapp</Authors>
+    <Authors>Agoda</Authors>
+    <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
+    <Description>Agoda.Frameworks.DB</Description>
+	  <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.5" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+    <PackageReference Include="Dapper" Version="2.0.30" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Agoda.Frameworks.LoadBalancing\Agoda.Frameworks.LoadBalancing.csproj" />

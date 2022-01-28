@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -16,8 +17,22 @@ namespace Agoda.Frameworks.LoadBalancing
         void UpdateWeight(TSource source, bool isSuccess);
         void UpdateResources(IReadOnlyDictionary<TSource, WeightItem> newResources);
 
-        event EventHandler<UpdateWeightEventArgs> OnUpdateWeight;
-        event EventHandler<UpdateWeightEventArgs> OnAllSourcesReachBottom;
+        event EventHandler<UpdateWeightEventArgs<TSource>> OnUpdateWeight;
+        event EventHandler<UpdateWeightEventArgs<TSource>> OnAllSourcesReachBottom;
+    }
+
+    public static class ResourceManager
+    {
+        public static IResourceManager<TSource> Create<TSource>(IEnumerable<TSource> sources)
+        {
+            var resources = new ConcurrentDictionary<TSource, WeightItem>();
+
+            foreach (var source in sources)
+            {
+                resources.GetOrAdd(source,  WeightItem.CreateDefaultItem());
+            }
+            return new ResourceManager<TSource>(resources, new AgodaWeightManipulationStrategy());
+        }
     }
 
     public class ResourceManager<TSource> : IResourceManager<TSource>
@@ -28,14 +43,14 @@ namespace Agoda.Frameworks.LoadBalancing
 
         public IReadOnlyDictionary<TSource, WeightItem> Resources => _collection;
 
-        public event EventHandler<UpdateWeightEventArgs> OnUpdateWeight;
-        public event EventHandler<UpdateWeightEventArgs> OnAllSourcesReachBottom;
+        public event EventHandler<UpdateWeightEventArgs<TSource>> OnUpdateWeight;
+        public event EventHandler<UpdateWeightEventArgs<TSource>> OnAllSourcesReachBottom;
 
         private static void CheckCollectionArg(IReadOnlyDictionary<TSource, WeightItem> collection)
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("Source collection must not be null.", nameof(collection));
+                throw new ArgumentNullException(nameof(collection), "Source collection must not be null.");
             }
 
             if (collection.Count == 0)
@@ -88,6 +103,7 @@ namespace Agoda.Frameworks.LoadBalancing
 
             ImmutableDictionary<TSource, WeightItem> oldCollection;
             ImmutableDictionary<TSource, WeightItem> newCollection;
+            var isDifferent = false;
             lock (_collection)
             {
                 oldCollection = _collection;
@@ -97,9 +113,20 @@ namespace Agoda.Frameworks.LoadBalancing
                         x => oldCollection.TryGetValue(x.Key, out var weight)
                             ? weight
                             : x.Value);
-                _collection = newCollection;
+                isDifferent = !(
+                    oldCollection.Keys.Count() == newCollection.Keys.Count() &&
+                    oldCollection.Keys.All(x =>
+                        newCollection.ContainsKey(x) &&
+                        newCollection[x].Equals(oldCollection[x])));
+                if (isDifferent)
+                {
+                    _collection = newCollection;
+                }
             }
-
+            if (isDifferent)
+            {
+                RaiseWeightUpdateEvent(oldCollection, newCollection);
+            }
             if(oldCollection != newCollection)
             {
                 RaiseWeightUpdateEvent(newCollection);
@@ -115,15 +142,33 @@ namespace Agoda.Frameworks.LoadBalancing
             }
         }
 
-        protected virtual void RaiseOnUpdateWeight(IEnumerable<WeightItem> weights) =>
-            OnUpdateWeight?.Invoke(this, new UpdateWeightEventArgs(weights));
+        protected virtual void RaiseOnUpdateWeight(
+                IReadOnlyDictionary<TSource, WeightItem> oldCollection,
+                IReadOnlyDictionary<TSource, WeightItem> newCollection) =>
+            OnUpdateWeight?.Invoke(
+                this,
+                new UpdateWeightEventArgs<TSource>(oldCollection, newCollection));
 
-        protected virtual void RaiseOnAllSourcesReachBottom(IEnumerable<WeightItem> weights) =>
-            OnAllSourcesReachBottom?.Invoke(this, new UpdateWeightEventArgs(weights));
+        protected virtual void RaiseOnAllSourcesReachBottom(
+            IReadOnlyDictionary<TSource, WeightItem> oldCollection,
+                IReadOnlyDictionary<TSource, WeightItem> newCollection) =>
+            OnAllSourcesReachBottom?.Invoke(
+                this,
+                new UpdateWeightEventArgs<TSource>(oldCollection, newCollection));
     }
 
     public static class ResourceManagerExtension
     {
+        public static void UpdateResources<TSource>(
+            this IResourceManager<TSource> mgr,
+            IEnumerable<TSource> collection)
+        {
+            mgr.UpdateResources(
+                collection
+                .Distinct()
+                .ToDictionary(x => x, _ => WeightItem.CreateDefaultItem()));
+        }
+
         // TODO: Test
         public static TResult ExecuteAction<TSource, TResult>(
             this IResourceManager<TSource> mgr,
@@ -143,6 +188,16 @@ namespace Agoda.Frameworks.LoadBalancing
         {
             var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
             return retryAction.ExecuteAsync(taskFunc, shouldRetry, onError);
+        }
+
+        public static Task<IReadOnlyList<RetryActionResult<TSource, TResult>>> ExecuteAsyncWithDiag<TSource, TResult>(
+            this IResourceManager<TSource> mgr,
+            RandomSourceAsyncFunc<TSource, TResult> taskFunc,
+            ShouldRetryPredicate shouldRetry,
+            OnError onError = null)
+        {
+            var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
+            return retryAction.ExecuteAsyncWithDiag(taskFunc, shouldRetry, onError);
         }
     }
 }

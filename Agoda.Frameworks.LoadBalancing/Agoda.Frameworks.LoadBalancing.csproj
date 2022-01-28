@@ -1,12 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Authors>Agoda</Authors>
+    <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
+    <Company>Agoda</Company>
+    <Description>Agoda.Frameworks.LoadBalancing</Description>
+	  <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>mobapp</Authors>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
   </ItemGroup>
 
 </Project>

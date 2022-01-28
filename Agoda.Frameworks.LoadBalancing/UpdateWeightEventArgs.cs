@@ -3,13 +3,17 @@ using System.Collections.Generic;
 
 namespace Agoda.Frameworks.LoadBalancing
 {
-    public sealed class UpdateWeightEventArgs : EventArgs
+    public sealed class UpdateWeightEventArgs<TSource> : EventArgs
     {
-        public UpdateWeightEventArgs(IEnumerable<WeightItem> weightItems)
+        public UpdateWeightEventArgs(
+            IReadOnlyDictionary<TSource, WeightItem> oldCollection,
+            IReadOnlyDictionary<TSource, WeightItem> newCollection)
         {
-            WeightItems = weightItems;
+            OldResources = oldCollection;
+            NewResources = newCollection;
         }
 
-        public IEnumerable<WeightItem> WeightItems { get; }
+        public IReadOnlyDictionary<TSource, WeightItem> OldResources { get; }
+        public IReadOnlyDictionary<TSource, WeightItem> NewResources { get; }
     }
 }
