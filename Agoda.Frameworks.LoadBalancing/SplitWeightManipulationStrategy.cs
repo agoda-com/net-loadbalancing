@@ -13,10 +13,10 @@
             Decrement = decrement;
         }
 
-        public WeightItem UpdateWeight<T>(T source, WeightItem originalWeight, bool isSuccess)
+        public WeightItem UpdateWeight(WeightItem originalWeight, bool isSuccess)
         {
             var strategy = isSuccess ? Increment : Decrement;
-            return strategy.UpdateWeight(source, originalWeight, isSuccess);
+            return strategy.UpdateWeight(originalWeight, isSuccess);
         }
     }
 }

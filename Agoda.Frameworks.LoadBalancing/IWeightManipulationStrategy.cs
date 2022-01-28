@@ -2,8 +2,7 @@
 {
     public interface IWeightManipulationStrategy
     {
-        WeightItem UpdateWeight<T>(
-            T source,
+        WeightItem UpdateWeight(
             WeightItem originalWeight,
             bool isSuccess);
     }

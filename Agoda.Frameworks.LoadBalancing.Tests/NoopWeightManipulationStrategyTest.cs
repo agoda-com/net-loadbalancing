@@ -10,7 +10,7 @@ namespace Agoda.Frameworks.LoadBalancing.Test
         {
             var strats = NoopWeightManipulationStrategy.Default;
             var oldWeight = new WeightItem(50, 100);
-            var newWeight = strats.UpdateWeight("tgt", oldWeight, isSuccess);
+            var newWeight = strats.UpdateWeight(oldWeight, isSuccess);
             Assert.AreEqual(oldWeight, newWeight);
         }
     }

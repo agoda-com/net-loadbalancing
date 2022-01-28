@@ -9,7 +9,7 @@
         public static NoopWeightManipulationStrategy Default { get; }
             = new NoopWeightManipulationStrategy();
 
-        public WeightItem UpdateWeight<T>(T source, WeightItem originalWeight, bool isSuccess)
+        public WeightItem UpdateWeight(WeightItem originalWeight, bool isSuccess)
         {
             return originalWeight;
         }
