@@ -190,11 +190,13 @@ namespace Agoda.Frameworks.LoadBalancing.Test
                 onUpdateWeightCount++;
             };
 
-            var oldResources = mgr.Resources;
+            var oldResources = mgr.Resources.ToDictionary(entry => entry.Key,
+                entry => entry.Value); ;
             mgr.UpdateWeight("tgt", false);
 
             Assert.AreEqual(1, onUpdateWeightCount);
-            Assert.AreNotSame(oldResources, mgr.Resources);
+            Assert.AreNotSame(oldResources, mgr.Resources.ToDictionary(entry => entry.Key,
+                entry => entry.Value));
         }
     }
 }
