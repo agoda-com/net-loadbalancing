@@ -93,8 +93,8 @@ namespace Agoda.Frameworks.LoadBalancing
             var oldCollection = _collection;
             if (_collection.ContainsKey(source))
             {
-                _collection[source].UpdateWeight(_weightManipulationStrategy, isSuccess);
-                RaiseWeightUpdateEvent(_collection, oldCollection);
+                if(_collection[source].UpdateWeight(_weightManipulationStrategy, isSuccess))
+                    RaiseWeightUpdateEvent(_collection, oldCollection);
             }
         }
 
@@ -107,7 +107,7 @@ namespace Agoda.Frameworks.LoadBalancing
             var isDifferent = false;
             lock (_collection)
             {
-                oldCollection = _collection;
+                oldCollection = _collection ;
                 newCollection = collection
                     .ToImmutableDictionary(
                         x => x.Key,

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="RichardSzalay.MockHttp" Version="6.0.0" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
   </ItemGroup>
 
   <ItemGroup>

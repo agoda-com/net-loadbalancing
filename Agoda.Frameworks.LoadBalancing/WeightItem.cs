@@ -64,14 +64,15 @@ namespace Agoda.Frameworks.LoadBalancing
             return new WeightItem(1000, 1000);
         }
 
-        public void UpdateWeight(IWeightManipulationStrategy weightManipulationStrategy, bool isSuccess)
+        public bool UpdateWeight(IWeightManipulationStrategy weightManipulationStrategy, bool isSuccess)
         {
-            int initialWeight, newWeight;
-            do
-            {
-                initialWeight = _weight;
-                newWeight = weightManipulationStrategy.UpdateWeight(this, isSuccess).Weight;
-            } while (initialWeight != Interlocked.CompareExchange(ref _weight, newWeight, initialWeight));
+            var initialWeight = _weight;
+            var newWeight = weightManipulationStrategy.UpdateWeight(this, isSuccess).Weight;
+            if (newWeight == initialWeight) return false;
+
+            Interlocked.CompareExchange(ref _weight, newWeight, initialWeight);
+            return true;
+
         }
     }
 

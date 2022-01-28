@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Moq;
 using NUnit.Framework;
+using Shouldly;
 
 namespace Agoda.Frameworks.LoadBalancing.Test
 {
@@ -153,11 +154,14 @@ namespace Agoda.Frameworks.LoadBalancing.Test
                 onUpdateWeightCount++;
             };
 
-            var oldResources = mgr.Resources;
+            var oldResources = mgr.Resources
+                .ToDictionary(entry => entry.Key,
+                            entry => entry.Value); 
             mgr.UpdateWeight("tgt", true);
 
-            Assert.AreEqual(0, onUpdateWeightCount);
-            Assert.AreSame(oldResources, mgr.Resources);
+            onUpdateWeightCount.ShouldBe(0);
+            oldResources.ShouldBe(mgr.Resources.ToDictionary(entry => entry.Key,
+                entry => entry.Value));
         }
         
         [Test]
