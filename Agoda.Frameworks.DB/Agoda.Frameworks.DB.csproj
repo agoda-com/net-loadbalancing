@@ -3,7 +3,6 @@
     <Authors>Agoda</Authors>
     <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
     <Description>Agoda.Frameworks.DB</Description>
-    <VersionPrefix>7.0.89</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup>
