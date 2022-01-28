@@ -28,10 +28,19 @@ jobs:
     - name: Test
       run: dotnet test
 
+    - name: Benchmark
+      run: Agoda.Frameworks.LoadBalancing.Benchmark/bin/Release/net6.0/Agoda.Frameworks.LoadBalancing.Benchmark.exe
+
+    - name: Publish Benchmark Results artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: BenchmarkDotNet
+        path: BenchmarkDotNet.Artifacts
+
     - name: Pack
       run: dotnet pack --configuration Release -o finalpackage --no-build
 
-    - name: Publish artifact
+    - name: Publish nuget artifact
       uses: actions/upload-artifact@master
       with:
         name: nupkg
