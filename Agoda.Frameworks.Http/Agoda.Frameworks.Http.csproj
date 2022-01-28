@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <PackageProjectUrl>https://github.com/agoda-com/net-loadbalancing</PackageProjectUrl>
