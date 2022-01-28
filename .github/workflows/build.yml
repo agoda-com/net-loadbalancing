@@ -20,7 +20,7 @@ jobs:
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0
+        dotnet-version: '6.0.x'
 
     - name: Restore
       run: dotnet restore
@@ -66,7 +66,7 @@ jobs:
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0
+          dotnet-version: '6.0.x'
 
       - name: Push to NuGet
         run: dotnet nuget push nupkg/**/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://nuget.org --skip-duplicate
