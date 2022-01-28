@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: master
 
+env:
+  MAJOR_MINOR_VERSION: 7.1.
+  SOLUTION_FILE: Agoda.LoadBalancing.sln
+
 jobs:
   build:
     name: Build Package 
@@ -16,7 +20,8 @@ jobs:
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.1.100'
+        dotnet-version: '6.0.x'
+
 
     - name: Restore
       run: dotnet restore
@@ -37,8 +42,13 @@ jobs:
         name: BenchmarkDotNet
         path: BenchmarkDotNet.Artifacts
 
-    - name: Pack
-      run: dotnet pack --configuration Release -o finalpackage --no-build
+    - name: Pack Release
+      if: github.ref == 'refs/heads/master'
+      run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
+
+    - name: Pack Preview
+      if: github.ref != 'refs/heads/master'
+      run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}-preview
 
     - name: Publish nuget artifact
       uses: actions/upload-artifact@master
@@ -66,7 +76,7 @@ jobs:
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.100
+          dotnet-version: '6.0.x'
 
       - name: Push to NuGet
         run: dotnet nuget push nupkg/**/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://nuget.org --skip-duplicate
