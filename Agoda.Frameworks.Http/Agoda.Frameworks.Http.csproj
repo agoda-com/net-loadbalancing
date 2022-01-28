@@ -6,6 +6,7 @@
     <Product>Agoda.Frameworks.Http</Product>
     <Company>Agoda</Company>
     <Description>Agoda.Frameworks.Http</Description>
+	  <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>

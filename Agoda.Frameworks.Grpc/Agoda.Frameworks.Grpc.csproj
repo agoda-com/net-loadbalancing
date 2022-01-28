@@ -6,6 +6,7 @@
     <Product>Agoda.Frameworks.Grpc</Product>
     <Company>Agoda</Company>
     <Description>Agoda.Frameworks.Grpc</Description>
+	  <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
