@@ -51,7 +51,7 @@ jobs:
       run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Release -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}-preview
 
     - name: Publish nuget artifact
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v3
       with:
         name: nupkg
         path: finalpackage
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Package artifact
-        uses: actions/download-artifact@master
+        uses: actions/download-artifactt@v3
         with:
           name: nupkg
           path: ./nupkg
