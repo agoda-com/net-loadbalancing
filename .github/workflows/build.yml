@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Package artifact
-        uses: actions/download-artifactt@v3
+        uses: actions/download-artifact@v3
         with:
           name: nupkg
           path: ./nupkg
