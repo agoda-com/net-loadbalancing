@@ -16,9 +16,9 @@ jobs:
     runs-on: windows-latest # using windows agent for net462 build.
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v2
       with:
         dotnet-version: '6.0.x'
 
@@ -27,7 +27,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
 
     # Run the tests, ideally should stop here if a fail and also publish results as artifacts
     - name: Test
@@ -51,7 +51,7 @@ jobs:
       run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}-preview
 
     - name: Publish nuget artifact
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v3
       with:
         name: nupkg
         path: finalpackage
@@ -62,21 +62,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Package artifact
-        uses: actions/download-artifact@master
+        uses: actions/download-artifact@v3
         with:
           name: nupkg
           path: ./nupkg
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.5
+        uses: NuGet/setup-nuget@v1
         with:
           nuget-api-key: ${{ secrets.NUGET_API_KEY }}
           nuget-version: latest
 
       - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '6.0.x'
 
       - name: Push to NuGet
-        run: dotnet nuget push nupkg/**/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://nuget.org --skip-duplicate
+        run: dotnet nuget push nupkg/**/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
