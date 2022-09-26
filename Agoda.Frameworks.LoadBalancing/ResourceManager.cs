@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -22,12 +23,16 @@ namespace Agoda.Frameworks.LoadBalancing
 
     public static class ResourceManager
     {
-        public static IResourceManager<TSource> Create<TSource>(IEnumerable<TSource> sources) =>
-            new ResourceManager<TSource>(
-                sources.ToDictionary(
-                    x => x,
-                    _ => WeightItem.CreateDefaultItem()),
-                new AgodaWeightManipulationStrategy());
+        public static IResourceManager<TSource> Create<TSource>(IEnumerable<TSource> sources)
+        {
+            var resources = new ConcurrentDictionary<TSource, WeightItem>();
+
+            foreach (var source in sources)
+            {
+                resources.GetOrAdd(source,  WeightItem.CreateDefaultItem());
+            }
+            return new ResourceManager<TSource>(resources, new AgodaWeightManipulationStrategy());
+        }
     }
 
     public class ResourceManager<TSource> : IResourceManager<TSource>
@@ -86,28 +91,10 @@ namespace Agoda.Frameworks.LoadBalancing
         public void UpdateWeight(TSource source, bool isSuccess)
         {
             var oldCollection = _collection;
-            if (oldCollection.TryGetValue(source, out var weight))
+            if (_collection.ContainsKey(source))
             {
-                var newWeight = _weightManipulationStrategy.UpdateWeight(
-                    source,
-                    weight,
-                    isSuccess);
-                if (!newWeight.Equals(weight))
-                {
-                    // Only update collection when new weight is different.
-                    ImmutableDictionary<TSource, WeightItem> newCollection;
-                    lock (_collection)
-                    {
-                        newCollection = _collection.SetItem(source, newWeight);
-                        if (_collection.ContainsKey(source))
-                        {
-                            // Only update collection when it still contains
-                            // the key we're updating.
-                            _collection = newCollection;
-                        }
-                    }
-                    RaiseWeightUpdateEvent(oldCollection, newCollection);
-                }
+                if(_collection[source].UpdateWeight(_weightManipulationStrategy, isSuccess))
+                    RaiseWeightUpdateEvent(_collection, oldCollection);
             }
         }
 
@@ -120,7 +107,7 @@ namespace Agoda.Frameworks.LoadBalancing
             var isDifferent = false;
             lock (_collection)
             {
-                oldCollection = _collection;
+                oldCollection = _collection ;
                 newCollection = collection
                     .ToImmutableDictionary(
                         x => x.Key,
@@ -143,8 +130,7 @@ namespace Agoda.Frameworks.LoadBalancing
             }
         }
 
-        private void RaiseWeightUpdateEvent(
-            ImmutableDictionary<TSource, WeightItem> oldCollection,
+        private void RaiseWeightUpdateEvent(ImmutableDictionary<TSource, WeightItem> oldCollection,
             ImmutableDictionary<TSource, WeightItem> newCollection)
         {
             RaiseOnUpdateWeight(oldCollection, newCollection);
@@ -168,48 +154,5 @@ namespace Agoda.Frameworks.LoadBalancing
                 this,
                 new UpdateWeightEventArgs<TSource>(oldCollection, newCollection));
     }
-
-    public static class ResourceManagerExtension
-    {
-        public static void UpdateResources<TSource>(
-            this IResourceManager<TSource> mgr,
-            IEnumerable<TSource> collection)
-        {
-            mgr.UpdateResources(
-                collection
-                .Distinct()
-                .ToDictionary(x => x, _ => WeightItem.CreateDefaultItem()));
-        }
-
-        // TODO: Test
-        public static TResult ExecuteAction<TSource, TResult>(
-            this IResourceManager<TSource> mgr,
-            RandomSourceFunc<TSource, TResult> func,
-            ShouldRetryPredicate shouldRetry,
-            OnError onError = null)
-        {
-            var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
-            return retryAction.ExecuteAction(func, shouldRetry, onError);
-        }
-
-        public static Task<TResult> ExecuteAsync<TSource, TResult>(
-            this IResourceManager<TSource> mgr,
-            RandomSourceAsyncFunc<TSource, TResult> taskFunc,
-            ShouldRetryPredicate shouldRetry,
-            OnError onError = null)
-        {
-            var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
-            return retryAction.ExecuteAsync(taskFunc, shouldRetry, onError);
-        }
-
-        public static Task<IReadOnlyList<RetryActionResult<TSource, TResult>>> ExecuteAsyncWithDiag<TSource, TResult>(
-            this IResourceManager<TSource> mgr,
-            RandomSourceAsyncFunc<TSource, TResult> taskFunc,
-            ShouldRetryPredicate shouldRetry,
-            OnError onError = null)
-        {
-            var retryAction = new RetryAction<TSource>(mgr.SelectRandomly, mgr.UpdateWeight);
-            return retryAction.ExecuteAsyncWithDiag(taskFunc, shouldRetry, onError);
-        }
-    }
+    
 }

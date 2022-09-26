@@ -9,9 +9,9 @@ namespace Agoda.Frameworks.LoadBalancing
             new ExponentialWeightManipulationStrategy(100)
         );
 
-        public WeightItem UpdateWeight<T>(T source, WeightItem originalWeight, bool isSuccess)
+        public WeightItem UpdateWeight(WeightItem originalWeight, bool isSuccess)
         {
-            return _strategy.UpdateWeight(source, originalWeight, isSuccess);
+            return _strategy.UpdateWeight(originalWeight, isSuccess);
         }
     }
 }
