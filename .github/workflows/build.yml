@@ -34,7 +34,7 @@ jobs:
       run: dotnet test
 
     - name: Benchmark
-      run: ./Agoda.Frameworks.LoadBalancing.Benchmark/bin/Release/net6.0/Agoda.Frameworks.LoadBalancing.Benchmark
+      run: ./Agoda.Frameworks.LoadBalancing.Benchmark/bin/Debug/net6.0/Agoda.Frameworks.LoadBalancing.Benchmark
 
     - name: Publish Benchmark Results artifact
       uses: actions/upload-artifact@master
