@@ -27,7 +27,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Debug --no-restore -p:Version=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
 
     # Run the tests, ideally should stop here if a fail and also publish results as artifacts
     - name: Test
