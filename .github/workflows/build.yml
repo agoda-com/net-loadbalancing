@@ -27,14 +27,14 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Debug --no-restore -p:Version=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
 
     # Run the tests, ideally should stop here if a fail and also publish results as artifacts
     - name: Test
       run: dotnet test
 
     - name: Benchmark
-      run: ./Agoda.Frameworks.LoadBalancing.Benchmark/bin/Debug/net6.0/Agoda.Frameworks.LoadBalancing.Benchmark
+      run: ./Agoda.Frameworks.LoadBalancing.Benchmark/bin/Release/net6.0/Agoda.Frameworks.LoadBalancing.Benchmark
 
     - name: Publish Benchmark Results artifact
       uses: actions/upload-artifact@master
@@ -44,11 +44,11 @@ jobs:
 
     - name: Pack Release
       if: github.ref == 'refs/heads/master'
-      run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
+      run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage -p:Version=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }} -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}
 
     - name: Pack Preview
       if: github.ref != 'refs/heads/master'
-      run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage --no-build -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}-preview
+      run: dotnet pack ${{ env.SOLUTION_FILE }} --configuration Debug -o finalpackage -p:Version=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }} -p:PackageVersion=${{ env.MAJOR_MINOR_VERSION }}${{ github.run_number }}-preview
 
     - name: Publish nuget artifact
       uses: actions/upload-artifact@v3
