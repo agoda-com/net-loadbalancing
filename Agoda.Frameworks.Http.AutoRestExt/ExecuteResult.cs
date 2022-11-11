@@ -61,8 +61,7 @@ namespace Agoda.Frameworks.Http.AutoRestExt
             foreach (var ex in Exceptions)
             {
                 sb.Append(string.Format("\r\n - \"{0}\" -> {1}", ex.Uri, ex.Message));
-            }
-
+            }       
             return new Exception(sb.ToString());
         }
     }
