@@ -124,20 +124,20 @@ namespace Agoda.Frameworks.Http
             string url,
             Func<string, HttpRequestMessage> requestMsg,
             Dictionary<string, string> headers) =>
-            SendAsync(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)), isThrow);
+            SendAsync(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)));
             
 
         public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
             string url,
             Func<string, HttpRequestMessage> requestMsg,
-            Dictionary<string, string> headers,
-            bool isThrow) =>
-            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)), isThrow);
+            Dictionary<string, string> headers) =>
+            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)));
             
         public Task<HttpResponseMessage> SendAsync(
             string url,
             Func<string, HttpRequestMessage> requestMsg,
-            Dictionary<string, string> headers) =>
+            Dictionary<string, string> headers,
+            bool isThrow) =>
             SendAsync(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)), isThrow);
             
 
