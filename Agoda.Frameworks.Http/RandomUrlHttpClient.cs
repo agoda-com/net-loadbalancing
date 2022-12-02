@@ -131,8 +131,9 @@ namespace Agoda.Frameworks.Http
         public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
             string url,
             Func<string, HttpRequestMessage> requestMsg,
-            Dictionary<string, string> headers) =>
-            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)));
+            Dictionary<string, string> headers,
+            bool isThrow = true) =>
+            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)), isThrow);
 
         public Task<HttpResponseMessage> SendAsync(
             string url,
@@ -150,7 +151,7 @@ namespace Agoda.Frameworks.Http
             Func<string, Task<HttpResponseMessage>> send,
             bool isThrow = true)
         {
-            var results = await SendAsyncWithDiag(url, send);
+            var results = await SendAsyncWithDiag(url, send, isThrow);
             var result = results.Last();
             if (isThrow && result.IsError)
             {
@@ -161,7 +162,8 @@ namespace Agoda.Frameworks.Http
 
         private Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
             string url,
-            Func<string, Task<HttpResponseMessage>> send)
+            Func<string, Task<HttpResponseMessage>> send,
+            bool isThrow = true)
         {
             return UrlResourceManager.ExecuteAsyncWithDiag(async (source, _) =>
             {
@@ -176,6 +178,7 @@ namespace Agoda.Frameworks.Http
                     try
                     {
                         var res = await send(combinedUrl);
+                        if (!isThrow) return res;
                         if (IsTransientHttpStatusCode(res.StatusCode))
                         {
                             throw new TransientHttpRequestException(
