@@ -173,7 +173,7 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
         [Test]
         public void ShouldThrowRequestTimeoutExceptionWhenHttpRequestTimesOut()
         {
-            var mockHttp = new WaitedMockHttpMessageHandler(new TimeSpan(0, 0, 3));
+            var mockHttp = new WaitedMockHttpMessageHandler(TimeSpan.FromMilliseconds(300));
 
             mockHttp.When(HttpMethod.Get, "http://test/*")
                 .Respond(msg =>
@@ -186,7 +186,7 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
             var client = new RandomUrlHttpClient(
                 httpclient,
                 new[] { "http://test/1", "http://test/2" },
-                new TimeSpan(0, 0, 1),
+                TimeSpan.FromMilliseconds(100),
                 3,
                 null);
 
@@ -196,7 +196,7 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
         [Test]
         public async Task ShouldNotThrowRequestTimeoutExceptionWhenHttpRequestDoesNotTimesOut()
         {
-            var mockHttp = new WaitedMockHttpMessageHandler(new TimeSpan(0, 0, 1));
+            var mockHttp = new WaitedMockHttpMessageHandler(TimeSpan.FromMilliseconds(100));
 
             mockHttp.When(HttpMethod.Get, "http://test/*")
                 .Respond(msg =>
@@ -209,7 +209,7 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
             var client = new RandomUrlHttpClient(
                 httpclient,
                 new[] { "http://test/1", "http://test/2" },
-                new TimeSpan(0, 0, 3),
+                TimeSpan.FromMilliseconds(300),
                 3,
                 null);
 
@@ -222,7 +222,7 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
         [Test]
         public async Task ShouldNotThrowRequestTimeoutExceptionWhenNoTimesOut()
         {
-            var mockHttp = new WaitedMockHttpMessageHandler(new TimeSpan(0, 0, 1));
+            var mockHttp = new WaitedMockHttpMessageHandler(TimeSpan.FromMilliseconds(100));
 
             mockHttp.When(HttpMethod.Get, "http://test/*")
                 .Respond(msg =>
