@@ -1,8 +1,10 @@
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Agoda.Frameworks.Http;
+using Agoda.Frameworks.Http.Tests.MockSetup;
 using NUnit.Framework;
 using RichardSzalay.MockHttp;
 
@@ -166,6 +168,81 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
             // Should not throw due to identical items in the list (Distinct before ToDictionary)
             client.UpdateBaseUrls(new[] { "http://test/3", "http://test/3" });
             Assert.AreEqual("http://test/3", client.UrlResourceManager.SelectRandomly());
+        }
+
+        [Test]
+        public void ShouldThrowRequestTimeoutExceptionWhenHttpRequestTimesOut()
+        {
+            var mockHttp = new WaitedMockHttpMessageHandler(TimeSpan.FromMilliseconds(300));
+
+            mockHttp.When(HttpMethod.Get, "http://test/*")
+                .Respond(msg =>
+                {
+                    StringAssert.IsMatch("http://test/1|2/api/55", msg.RequestUri.AbsoluteUri);
+                    return new StringContent("ok");
+                });
+            var httpclient = mockHttp.ToHttpClient();
+
+            var client = new RandomUrlHttpClient(
+                httpclient,
+                new[] { "http://test/1", "http://test/2" },
+                TimeSpan.FromMilliseconds(100),
+                3,
+                null);
+
+            Assert.ThrowsAsync<RequestTimeoutException>(() => client.GetAsync("api/55"));
+        }
+
+        [Test]
+        public async Task ShouldNotThrowRequestTimeoutExceptionWhenHttpRequestDoesNotTimesOut()
+        {
+            var mockHttp = new WaitedMockHttpMessageHandler(TimeSpan.FromMilliseconds(100));
+
+            mockHttp.When(HttpMethod.Get, "http://test/*")
+                .Respond(msg =>
+                {
+                    StringAssert.IsMatch("http://test/1|2/api/55", msg.RequestUri.AbsoluteUri);
+                    return new StringContent("ok");
+                });
+            var httpclient = mockHttp.ToHttpClient();
+
+            var client = new RandomUrlHttpClient(
+                httpclient,
+                new[] { "http://test/1", "http://test/2" },
+                TimeSpan.FromMilliseconds(300),
+                3,
+                null);
+
+            var res = await client.GetAsync("api/55");
+            var content = await res.Content.ReadAsStringAsync();
+
+            Assert.AreEqual("ok", content);
+        }
+
+        [Test]
+        public async Task ShouldNotThrowRequestTimeoutExceptionWhenNoTimesOut()
+        {
+            var mockHttp = new WaitedMockHttpMessageHandler(TimeSpan.FromMilliseconds(100));
+
+            mockHttp.When(HttpMethod.Get, "http://test/*")
+                .Respond(msg =>
+                {
+                    StringAssert.IsMatch("http://test/1|2/api/55", msg.RequestUri.AbsoluteUri);
+                    return new StringContent("ok");
+                });
+            var httpclient = mockHttp.ToHttpClient();
+
+            var client = new RandomUrlHttpClient(
+                httpclient,
+                new[] { "http://test/1", "http://test/2" },
+                null,
+                3,
+                null);
+
+            var res = await client.GetAsync("api/55");
+            var content = await res.Content.ReadAsStringAsync();
+
+            Assert.AreEqual("ok", content);
         }
     }
 }

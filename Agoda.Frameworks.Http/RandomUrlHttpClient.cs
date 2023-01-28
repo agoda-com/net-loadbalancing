@@ -93,23 +93,23 @@ namespace Agoda.Frameworks.Http
         }
 
         public Task<HttpResponseMessage> GetAsync(string url) =>
-            SendAsync(url, uri => HttpClient.GetAsync(uri));
+            SendAsync(url, (uri, cxlToken) => HttpClient.GetAsync(uri, cxlToken));
 
 #if !NET462
         public Task<HttpResponseMessage> PostAsync(string url, HttpContent content) =>
-            SendAsync(url, uri => HttpClient.PostAsync(uri, content));
+            SendAsync(url, (uri, cxlToken) => HttpClient.PostAsync(uri, content, cxlToken));
 
         public Task<HttpResponseMessage> PutAsync(string url, HttpContent content) =>
-            SendAsync(url, uri => HttpClient.PutAsync(uri, content));
+            SendAsync(url, (uri, cxlToken) => HttpClient.PutAsync(uri, content, cxlToken));
 #endif
         public Task<HttpResponseMessage> PostJsonAsync(string url, string json) =>
-            SendAsync(url, uri => HttpClient.PostAsync(uri, new StringContent(json, Encoding.UTF8, "application/json")));
+            SendAsync(url, (uri, cxlToken) => HttpClient.PostAsync(uri, new StringContent(json, Encoding.UTF8, "application/json"), cxlToken));
 
         public Task<HttpResponseMessage> PutJsonAsync(string url, string json) =>
-            SendAsync(url, uri => HttpClient.PutAsync(uri, new StringContent(json, Encoding.UTF8, "application/json")));
+            SendAsync(url, (uri, cxlToken) => HttpClient.PutAsync(uri, new StringContent(json, Encoding.UTF8, "application/json"), cxlToken));
 
         public Task<HttpResponseMessage> DeleteAsync(string url) =>
-            SendAsync(url, uri => HttpClient.DeleteAsync(uri));
+            SendAsync(url, (uri, cxlToken) => HttpClient.DeleteAsync(uri, cxlToken));
 
         private HttpRequestMessage AddHeaders(HttpRequestMessage requestMessage, Dictionary<string, string> headers = null)
         {
@@ -119,49 +119,49 @@ namespace Agoda.Frameworks.Http
             }
             return requestMessage;
         }
-        
+
         public Task<HttpResponseMessage> SendAsync(
             string url,
             Func<string, HttpRequestMessage> requestMsg,
             Dictionary<string, string> headers) =>
-            SendAsync(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)));
-            
+            SendAsync(url, (uri, cxlToken) => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers), cxlToken));
+
 
         public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
             string url,
             Func<string, HttpRequestMessage> requestMsg,
             Dictionary<string, string> headers) =>
-            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)));
-            
+            SendAsyncWithDiag(url, (uri, cxlToken) => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers), cxlToken));
+
         public Task<HttpResponseMessage> SendAsync(
             string url,
             Func<string, HttpRequestMessage> requestMsg,
             Dictionary<string, string> headers,
             bool isThrow) =>
-            SendAsync(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)), isThrow);
-            
+            SendAsync(url, (uri, cxlToken) => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers), cxlToken), isThrow);
+
 
         public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
             string url,
             Func<string, HttpRequestMessage> requestMsg,
             Dictionary<string, string> headers,
             bool isThrow) =>
-            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers)), isThrow);
+            SendAsyncWithDiag(url, (uri, cxlToken) => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers), cxlToken), isThrow);
 
         public Task<HttpResponseMessage> SendAsync(
             string url,
             Func<string, HttpRequestMessage> requestMsg) =>
-            SendAsync(url, uri => HttpClient.SendAsync(requestMsg(uri)));
-            
+            SendAsync(url, (uri, cxlToken) => HttpClient.SendAsync(requestMsg(uri), cxlToken));
+
 
         public Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
             string url,
             Func<string, HttpRequestMessage> requestMsg) =>
-            SendAsyncWithDiag(url, uri => HttpClient.SendAsync(requestMsg(uri)));
+            SendAsyncWithDiag(url, (uri, cxlToken) => HttpClient.SendAsync(requestMsg(uri), cxlToken));
 
         private async Task<HttpResponseMessage> SendAsync(
             string url,
-            Func<string, Task<HttpResponseMessage>> send,
+            Func<string, CancellationToken, Task<HttpResponseMessage>> send,
             bool isThrow = true)
         {
             var results = await SendAsyncWithDiag(url, send, isThrow);
@@ -174,9 +174,9 @@ namespace Agoda.Frameworks.Http
         }
 
         private Task<IReadOnlyList<RetryActionResult<string, HttpResponseMessage>>> SendAsyncWithDiag(
-            string url,
-            Func<string, Task<HttpResponseMessage>> send,
-            bool isThrow = true)
+           string url,
+           Func<string, CancellationToken, Task<HttpResponseMessage>> send,
+           bool isThrow = true)
         {
             return UrlResourceManager.ExecuteAsyncWithDiag(async (source, _) =>
             {
@@ -190,13 +190,13 @@ namespace Agoda.Frameworks.Http
                     }
                     try
                     {
-                        var res = await send(combinedUrl);
+                        var res = await send(combinedUrl, cts.Token);
                         if (!isThrow) return res;
                         if (IsTransientHttpStatusCode(res.StatusCode))
                         {
                             throw new TransientHttpRequestException(
                                 url,
-                                combinedUrl, 
+                                combinedUrl,
                                 res,
                                 $"Response status code does not indicate success: ${res.StatusCode}");
                         }
@@ -222,7 +222,6 @@ namespace Agoda.Frameworks.Http
                         throw new ServiceUnavailableException(url, combinedUrl, e.Message, e);
                     }
                     catch (TaskCanceledException e)
-                        when (!cts.Token.IsCancellationRequested)
                     {
                         throw new RequestTimeoutException(url, combinedUrl, "Operation timeout", e);
                     }
