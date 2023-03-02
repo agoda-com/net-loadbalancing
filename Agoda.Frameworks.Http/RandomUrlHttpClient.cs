@@ -104,6 +104,17 @@ namespace Agoda.Frameworks.Http
 #endif
         public Task<HttpResponseMessage> PostJsonAsync(string url, string json) =>
             SendAsync(url, (uri, cxlToken) => HttpClient.PostAsync(uri, new StringContent(json, Encoding.UTF8, "application/json"), cxlToken));
+        
+        public Task<HttpResponseMessage> PostJsonAsync(string url, string json, Dictionary<string, string> headers) =>
+            SendAsync(url, (uri, cxlToken) =>
+            {
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                };
+                return HttpClient.SendAsync(AddHeaders(requestMessage, headers), cxlToken);
+            });
+
 
         public Task<HttpResponseMessage> PutJsonAsync(string url, string json) =>
             SendAsync(url, (uri, cxlToken) => HttpClient.PutAsync(uri, new StringContent(json, Encoding.UTF8, "application/json"), cxlToken));
