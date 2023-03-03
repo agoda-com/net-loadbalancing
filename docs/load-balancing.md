@@ -13,7 +13,7 @@ Agoda.Frameworks.LoadBalancing is a library that provides logic for handling ret
 
 ## Managing Resources
 
-```
+```c#
 // Initialize resource manager
 var mgr = new ResourceManager<string>(new Dictionary<string, WeightItem>()
 {
@@ -52,7 +52,7 @@ By calling `ExecuteAction` or `ExecuteAsync`, ResourceManager updates the weight
 
 Example:
 
-```
+```c#
 // Uses fixed delta strategy with delta = 20
 var mgr = new ResourceManager<string>(new Dictionary<string, WeightItem>()
 {
