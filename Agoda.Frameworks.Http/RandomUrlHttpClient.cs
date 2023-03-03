@@ -94,6 +94,8 @@ namespace Agoda.Frameworks.Http
 
         public Task<HttpResponseMessage> GetAsync(string url) =>
             SendAsync(url, (uri, cxlToken) => HttpClient.GetAsync(uri, cxlToken));
+        public Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> headers) =>
+            SendAsync(url, (uri, cxlToken) => HttpClient.SendAsync(AddHeaders(new HttpRequestMessage(HttpMethod.Get, uri), headers), cxlToken));
 
 #if !NET462
         public Task<HttpResponseMessage> PostAsync(string url, HttpContent content) =>
@@ -118,9 +120,22 @@ namespace Agoda.Frameworks.Http
 
         public Task<HttpResponseMessage> PutJsonAsync(string url, string json) =>
             SendAsync(url, (uri, cxlToken) => HttpClient.PutAsync(uri, new StringContent(json, Encoding.UTF8, "application/json"), cxlToken));
+        
+        public Task<HttpResponseMessage> PutJsonAsync(string url, string json, Dictionary<string, string> headers) =>
+            SendAsync(url, (uri, cxlToken) =>
+            {
+                var requestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                };
+                return HttpClient.SendAsync(AddHeaders(requestMessage, headers), cxlToken);
+            });
 
         public Task<HttpResponseMessage> DeleteAsync(string url) =>
             SendAsync(url, (uri, cxlToken) => HttpClient.DeleteAsync(uri, cxlToken));
+        
+        public Task<HttpResponseMessage> DeleteAsync(string url, Dictionary<string, string> headers) =>
+            SendAsync(url, (uri, cxlToken) => HttpClient.SendAsync(AddHeaders(new HttpRequestMessage(HttpMethod.Delete, uri), headers), cxlToken));
 
         private HttpRequestMessage AddHeaders(HttpRequestMessage requestMessage, Dictionary<string, string> headers = null)
         {
