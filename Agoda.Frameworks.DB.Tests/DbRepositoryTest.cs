@@ -685,9 +685,6 @@ namespace Agoda.Frameworks.DB.Tests
             );
            
             _dbResources.Verify(x => x.ChooseDb("mobile_ro").UpdateWeight(It.IsAny<string>(), false), Times.Exactly(maxAttemptCount));
-
-            // Setup for non-query is not supported
-
         }
 
 
