@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Agoda.Frameworks.DB
@@ -26,6 +27,7 @@ namespace Agoda.Frameworks.DB
             Func<SqlDataReader, Task<T>> callback,
             TimeSpan? timeSpan,
             string cacheKey = "");
+        
         Task<object> ExecuteScalarAsync(
             string dbName,
             string sqlCommandString,
@@ -131,6 +133,15 @@ namespace Agoda.Frameworks.DB
             string storedProc,
             int timeoutSecs,
             int maxAttemptCount,
+            IDbDataParameter[] parameters,
+            Func<SqlDataReader, Task<T>> callback);
+
+        Task<T> ExecuteReaderAsync<T>(
+            string database,
+            string storedProc,
+            int timeoutSecs,
+            int maxAttemptCount,
+            CancellationToken token,
             IDbDataParameter[] parameters,
             Func<SqlDataReader, Task<T>> callback);
 
