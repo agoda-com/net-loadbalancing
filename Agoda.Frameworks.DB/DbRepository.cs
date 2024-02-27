@@ -303,7 +303,7 @@ namespace Agoda.Frameworks.DB
             string storedProc,
             int timeoutSecs,
             int maxAttemptCount,
-            CancellationToken token,
+            int taskCancellationTimeOutInMilliSecs,
             IDbDataParameter[] parameters,
             Func<SqlDataReader, Task<T>> callback)
         {
@@ -311,6 +311,8 @@ namespace Agoda.Frameworks.DB
             {
                 var stopwatch = Stopwatch.StartNew();
                 Exception error = null;
+                var cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource.CancelAfter(taskCancellationTimeOutInMilliSecs);
                 try
                 {
                     using (var connection = _generateConnection(connectionStr))
@@ -332,7 +334,7 @@ namespace Agoda.Frameworks.DB
                                 CommandTimeout = timeoutSecs
                             };
                             sqlCommand.Parameters.AddRange(parameters);
-                            using (var reader = await sqlCommand.ExecuteReaderAsync(token))
+                            using (var reader = await sqlCommand.ExecuteReaderAsync(cancellationTokenSource.Token))
                             {
                                 return await callback(reader);
                             }
