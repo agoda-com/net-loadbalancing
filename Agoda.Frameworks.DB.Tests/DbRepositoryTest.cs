@@ -667,27 +667,6 @@ namespace Agoda.Frameworks.DB.Tests
             Assert.IsNotNull(_onQueryCompleteEvents[1].Error);
         }
         
-        [Test]
-        public async Task ExecuteReaderAsync_CancellationToken_Cancelled()
-        {
-            var cancellationToken = new CancellationTokenSource(TimeSpan.FromDays(1));
-            cancellationToken.Cancel();
-            var maxAttemptCount = 2;
-            Assert.ThrowsAsync<TaskCanceledException>(async () => await _db.ExecuteReaderAsync<string>("mobile_ro", "db.v1.sp_foo", 1,
-                maxAttemptCount,
-                cancellationToken.Token,
-                new IDbDataParameter[]
-                {
-                    new SqlParameter("@param1", "value1"),
-                    new SqlParameter("@param2", "value2")
-
-                }, reader => { return Task.FromResult("");})
-            );
-           
-            _dbResources.Verify(x => x.ChooseDb("mobile_ro").UpdateWeight(It.IsAny<string>(), false), Times.Exactly(maxAttemptCount));
-        }
-
-
         protected class FakeStoredProc : IStoredProc<string, string>
         {
             public string DbName => "mobile_ro";

@@ -141,7 +141,7 @@ namespace Agoda.Frameworks.DB
             string storedProc,
             int timeoutSecs,
             int maxAttemptCount,
-            CancellationToken token,
+            int taskCancellationTimeOutInMilliSecs,
             IDbDataParameter[] parameters,
             Func<SqlDataReader, Task<T>> callback);
 
