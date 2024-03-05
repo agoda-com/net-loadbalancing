@@ -311,55 +311,58 @@ namespace Agoda.Frameworks.DB
             {
                 var stopwatch = Stopwatch.StartNew();
                 Exception error = null;
-                var cancellationTokenSource = new CancellationTokenSource();
-                cancellationTokenSource.CancelAfter(taskCancellationTimeOutInMilliSecs);
-                try
+                using (var cancellationTokenSource = new CancellationTokenSource())
                 {
-                    using (var connection = _generateConnection(connectionStr))
+                    cancellationTokenSource.CancelAfter(taskCancellationTimeOutInMilliSecs);
+                    try
                     {
-                        if (connection is SqlConnection sqlConn)
+                        using (var connection = _generateConnection(connectionStr))
                         {
-                            await sqlConn.OpenAsync();
-                        }
-                        else
-                        {
-                            connection.Open();
-                        }
-                        SqlCommand sqlCommand = null;
-                        try
-                        {
-                            sqlCommand = new SqlCommand(storedProc, connection as SqlConnection)
+                            if (connection is SqlConnection sqlConn)
                             {
-                                CommandType = CommandType.StoredProcedure,
-                                CommandTimeout = timeoutSecs
-                            };
-                            sqlCommand.Parameters.AddRange(parameters);
-                            using (var reader = await sqlCommand.ExecuteReaderAsync(cancellationTokenSource.Token))
-                            {
-                                return await callback(reader);
+                                await sqlConn.OpenAsync(cancellationTokenSource.Token);
                             }
-                        }
-                        finally
-                        {
-                            if (sqlCommand != null)
+                            else
                             {
-                                sqlCommand.Parameters.Clear();
-                                sqlCommand.Dispose();
+                                connection.Open();
+                            }
+                            SqlCommand sqlCommand = null;
+                            try
+                            {
+                                sqlCommand = new SqlCommand(storedProc, connection as SqlConnection)
+                                {
+                                    CommandType = CommandType.StoredProcedure,
+                                    CommandTimeout = timeoutSecs
+                                };
+                                sqlCommand.Parameters.AddRange(parameters);
+                                using (var reader = await sqlCommand.ExecuteReaderAsync(cancellationTokenSource.Token))
+                                {
+                                    return await callback(reader);
+                                }
+                            }
+                            finally
+                            {
+                                if (sqlCommand != null)
+                                {
+                                    sqlCommand.Parameters.Clear();
+                                    sqlCommand.Dispose();
+                                }
                             }
                         }
                     }
+                    catch (Exception e)
+                    {
+                        error = e;
+                        throw;
+                    }
+                    finally
+                    {
+                        stopwatch.Stop();
+                        RaiseOnExecuteReaderComplete(
+                            database, storedProc, stopwatch.ElapsedMilliseconds, error);
+                    }
                 }
-                catch (Exception e)
-                {
-                    error = e;
-                    throw;
-                }
-                finally
-                {
-                    stopwatch.Stop();
-                    RaiseOnExecuteReaderComplete(
-                        database, storedProc, stopwatch.ElapsedMilliseconds, error);
-                }
+               
             }, ShouldRetry(maxAttemptCount), RaiseOnError);
         }
 
