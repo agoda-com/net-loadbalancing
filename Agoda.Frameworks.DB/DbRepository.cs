@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Agoda.Frameworks.LoadBalancing;
 using Dapper;
@@ -294,6 +295,74 @@ namespace Agoda.Frameworks.DB
                     RaiseOnExecuteReaderComplete(
                         database, storedProc, stopwatch.ElapsedMilliseconds, error);
                 }
+            }, ShouldRetry(maxAttemptCount), RaiseOnError);
+        }
+        
+        public Task<T> ExecuteReaderAsync<T>(
+            string database,
+            string storedProc,
+            int timeoutSecs,
+            int maxAttemptCount,
+            int taskCancellationTimeOutInMilliSecs,
+            IDbDataParameter[] parameters,
+            Func<SqlDataReader, Task<T>> callback)
+        {
+            return _dbResources.ChooseDb(database).ExecuteAsync(async (connectionStr, _) =>
+            {
+                var stopwatch = Stopwatch.StartNew();
+                Exception error = null;
+                using (var cancellationTokenSource = new CancellationTokenSource())
+                {
+                    cancellationTokenSource.CancelAfter(taskCancellationTimeOutInMilliSecs);
+                    try
+                    {
+                        using (var connection = _generateConnection(connectionStr))
+                        {
+                            if (connection is SqlConnection sqlConn)
+                            {
+                                await sqlConn.OpenAsync(cancellationTokenSource.Token);
+                            }
+                            else
+                            {
+                                connection.Open();
+                            }
+                            SqlCommand sqlCommand = null;
+                            try
+                            {
+                                sqlCommand = new SqlCommand(storedProc, connection as SqlConnection)
+                                {
+                                    CommandType = CommandType.StoredProcedure,
+                                    CommandTimeout = timeoutSecs
+                                };
+                                sqlCommand.Parameters.AddRange(parameters);
+                                using (var reader = await sqlCommand.ExecuteReaderAsync(cancellationTokenSource.Token))
+                                {
+                                    return await callback(reader);
+                                }
+                            }
+                            finally
+                            {
+                                if (sqlCommand != null)
+                                {
+                                    sqlCommand.Parameters.Clear();
+                                    sqlCommand.Dispose();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        error = e;
+                        throw;
+                    }
+                    finally
+                    {
+                        stopwatch.Stop();
+                        RaiseOnExecuteReaderComplete(
+                            database, storedProc, stopwatch.ElapsedMilliseconds, error);
+                    }
+                }
+               
             }, ShouldRetry(maxAttemptCount), RaiseOnError);
         }
 

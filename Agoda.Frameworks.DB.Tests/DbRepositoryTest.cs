@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Moq;
@@ -664,7 +666,6 @@ namespace Agoda.Frameworks.DB.Tests
             Assert.IsNotNull(_onQueryCompleteEvents[0].Error);
             Assert.IsNotNull(_onQueryCompleteEvents[1].Error);
         }
-
         protected class FakeStoredProc : IStoredProc<string, string>
         {
             public string DbName => "mobile_ro";
