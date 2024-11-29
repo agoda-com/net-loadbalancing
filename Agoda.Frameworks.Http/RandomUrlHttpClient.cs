@@ -148,6 +148,15 @@ namespace Agoda.Frameworks.Http
             bool isThrow) =>
             SendAsyncWithDiag(url, (uri, cxlToken) => HttpClient.SendAsync(AddHeaders(requestMsg(uri), headers), cxlToken), isThrow);
 
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return await SendAsync(request.RequestUri.PathAndQuery, (url) =>
+            {
+                request.RequestUri = new Uri(url);
+                return HttpClient.SendAsync(request, cancellationToken);
+            });
+        }
+
         public Task<HttpResponseMessage> SendAsync(
             string url,
             Func<string, HttpRequestMessage> requestMsg) =>
