@@ -17,17 +17,21 @@ namespace Agoda.Frameworks.Http
         public TimeSpan? Timeout { get; }
         private readonly Func<HttpResponseMessage, string, int> _isErrorResponse = (_1, _2) => 0;
         private readonly ShouldRetryPredicate _shouldRetry;
-
+        private readonly bool _enableHostHeader;
         public event EventHandler<HttpErrorEventArgs> OnError;
 
         public RandomUrlHttpClient(
             string[] baseUrls,
             TimeSpan? timeout = null,
             int maxRetry = 3,
-            Func<HttpResponseMessage, string, int> isErrorResponse = null)
+            Func<HttpResponseMessage, string, int> isErrorResponse = null,
+            bool enableHostHeader)
             : this(new HttpClient(), baseUrls, timeout, maxRetry, isErrorResponse)
         {
+            this._enabledHostHeader = enableHostHeader;
         }
+
+
 
         public RandomUrlHttpClient(
             HttpClient httpClient,
