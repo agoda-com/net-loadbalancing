@@ -7,7 +7,7 @@ on:
     branches: master
 
 env:
-  MAJOR_MINOR_VERSION: 7.1.
+  MAJOR_MINOR_VERSION: 8.0.
   SOLUTION_FILE: Agoda.LoadBalancing.sln
 
 jobs:
