@@ -68,7 +68,7 @@ jobs:
           path: ./nupkg
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
+        uses: NuGet/setup-nuget@v2
         with:
           nuget-api-key: ${{ secrets.NUGET_API_KEY }}
           nuget-version: latest
