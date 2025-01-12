@@ -67,6 +67,7 @@ jobs:
           name: nupkg
           path: ./nupkg
 
+      # Empty commit to show that bugged 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
         with:
