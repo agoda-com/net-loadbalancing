@@ -67,12 +67,6 @@ jobs:
           name: nupkg
           path: ./nupkg
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
-        with:
-          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-          nuget-version: latest
-
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v2
         with:
