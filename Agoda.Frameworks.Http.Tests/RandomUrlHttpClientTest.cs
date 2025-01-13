@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -105,7 +106,7 @@ namespace Agoda.Frameworks.LoadBalancing.Tests
                 null,
                 3,
                 null);
-            var res = await client.PostJsonAsync("api/55", "{\"foo\":\"bar\"}");
+            var res = await client.PostJsonAsync("api/55", "{\"foo\":\"bar\"}", new Dictionary<string, string>{ {"test", "test"}});
             var content = await res.Content.ReadAsStringAsync();
 
             Assert.AreEqual("ok", content);
